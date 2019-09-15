@@ -368,8 +368,10 @@ public class BlogServiceImpl implements BlogService {
     }
 
 
-    @Value("${upload.dir}")
+    @Value("${local.dir}")
     private  String fileDirpath ;
+    @Value("${upload.dir}")
+    private  String uploadDirpath ;
     /**
      * 上传文件工具类
      * @param multipartFile
@@ -381,6 +383,7 @@ public class BlogServiceImpl implements BlogService {
         }
         //指定存放上传文件的目录
         String fileDir = fileDirpath+DateUtil.getNowMonth()+"\\";
+
         File dir = new File(fileDir);
 
         //判断目录是否存在，不存在则创建目录
@@ -394,7 +397,7 @@ public class BlogServiceImpl implements BlogService {
         String suffix = originalFileName.substring(originalFileName.lastIndexOf('.'));
         //2、使用UUID生成新文件名
         String newFileName = UUID.randomUUID() + suffix;
-
+        String uploadDri = uploadDirpath +DateUtil.getNowMonth()+"\\" + newFileName;
         //生成文件
         //        C:\ftpfile\img  sdasdasd.jpg
         File file = new File(dir, newFileName);
@@ -411,7 +414,7 @@ public class BlogServiceImpl implements BlogService {
 
         //上传至ftp服务器
         //1、上传文件
-        if (FtpUtil.uploadToFtp(file,DateUtil.getNowMonth())){
+        if (FtpUtil.uploadToFtp(file,DateUtil.getNowMonth(),uploadDri)){
             System.out.println("上传至ftp服务器！");
         }else {
             throw new FileException(ExceptionEnum.FILENUPLOADFTPFAILED);
