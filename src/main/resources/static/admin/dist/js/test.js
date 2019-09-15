@@ -1,7 +1,7 @@
 $(function () {
     new AjaxUpload('#uploadButton', {
-        action: '/admin/upload/file',
-        name: 'file',
+        action: '/admin/blogs/md/uploadfile',
+        name: 'editormd-image-file',
         autoSubmit: true,
         responseType: "json",
         onSubmit: function (file, extension) {

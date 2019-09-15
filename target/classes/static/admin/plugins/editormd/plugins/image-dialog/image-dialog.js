@@ -130,10 +130,10 @@
 				fileInput.bind("change", function() {
 					var fileName  = fileInput.val();
 					var isImage   = new RegExp("(\\.(" + settings.imageFormats.join("|") + "))$"); // /(\.(webp|jpg|jpeg|gif|bmp|png))$/
-                    console.log('**************1');
+                    console.log("111111");
 					if (fileName === "")
 					{
-					    console.log('**************2');
+                        console.log("22222");
 						alert(imageLang.uploadFileEmpty);
 
                         return false;
@@ -141,7 +141,6 @@
 
                     if (!isImage.test(fileName))
 					{
-                        console.log('**************3');
 						alert(imageLang.formatNotAllowed + settings.imageFormats.join(", "));
 
                         return false;
@@ -161,15 +160,17 @@
                             var json = (body.innerText) ? body.innerText : ( (body.textContent) ? body.textContent : null);
 
                             json = (typeof JSON.parse !== "undefined") ? JSON.parse(json) : eval("(" + json + ")");
-
+                            console.log(json);
                             if(!settings.crossDomainUpload)
                             {
-                              if (json.success === 1)
+                              if (json.resultCode === 200)
                               {
-                                  dialog.find("[data-url]").val(json.url);
+                                  console.log("444444");
+                                  dialog.find("[data-url]").val(json.data);
                               }
                               else
                               {
+                                  console.log("333333");
                                   alert(json.message);
                               }
                             }

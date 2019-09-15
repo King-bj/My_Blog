@@ -40,7 +40,7 @@ $(function () {
                         var formData = new FormData();
                         formData.append('file', file);
                         var xhr = new XMLHttpRequest();
-                        xhr.open("POST", "/admin/upload/file");
+                        xhr.open("POST", "/admin/blogs/md/uploadfile");
                         xhr.onreadystatechange = function () {
                             if (xhr.readyState == 4 && xhr.status == 200) {
                                 var json=JSON.parse(xhr.responseText);
@@ -59,8 +59,8 @@ $(function () {
     });
 
     new AjaxUpload('#uploadCoverImage', {
-        action: '/admin/upload/file',
-        name: 'file',
+        action: '/admin/blogs/md/uploadfile',
+        name: 'editormd-image-file',
         autoSubmit: true,
         responseType: "json",
         onSubmit: function (file, extension) {

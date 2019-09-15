@@ -130,10 +130,9 @@
 				fileInput.bind("change", function() {
 					var fileName  = fileInput.val();
 					var isImage   = new RegExp("(\\.(" + settings.imageFormats.join("|") + "))$"); // /(\.(webp|jpg|jpeg|gif|bmp|png))$/
-                    console.log('**************1');
+
 					if (fileName === "")
 					{
-					    console.log('**************2');
 						alert(imageLang.uploadFileEmpty);
 
                         return false;
@@ -141,7 +140,6 @@
 
                     if (!isImage.test(fileName))
 					{
-                        console.log('**************3');
 						alert(imageLang.formatNotAllowed + settings.imageFormats.join(", "));
 
                         return false;
@@ -164,9 +162,9 @@
 
                             if(!settings.crossDomainUpload)
                             {
-                              if (json.success === 1)
+                              if (json.resultCode === 200)
                               {
-                                  dialog.find("[data-url]").val(json.url);
+                                  dialog.find("[data-url]").val(json.data);
                               }
                               else
                               {
