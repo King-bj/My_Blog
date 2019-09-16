@@ -22,19 +22,19 @@ public class FtpUtil {
     private static FTPClient ftpClient = new FTPClient();
     private static Logger logger = LoggerFactory.getLogger(FtpUtil.class);
 
-    public static boolean uploadToFtp(File file,String date){
+    public static boolean uploadToFtp(File file,String date,String filePath){
         //FTPClient ftpClient = new FTPClient();
         try {
             //连接ftp服务器 参数填服务器的ip
-            ftpClient.connect("129.226.137.36");
+            ftpClient.connect("xxx");
 
             //进行登录 参数分别为账号 密码
-            ftpClient.login("user","`123456poilkj");
+            ftpClient.login("user","xxx");
 
             //改变工作目录（按自己需要是否改变）
             CreateDirecroty(date);
             //只能选择local_root下已存在的目录
-            ftpClient.changeWorkingDirectory(file.getPath());
+            ftpClient.changeWorkingDirectory(filePath);
 
             //设置文件类型为二进制文件
             ftpClient.setFileType(FTP.BINARY_FILE_TYPE);

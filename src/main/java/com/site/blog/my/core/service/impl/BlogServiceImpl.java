@@ -379,7 +379,7 @@ public class BlogServiceImpl implements BlogService {
     public String uploadFile(MultipartFile multipartFile) throws FileException
     {
         if(StringUtils.isEmpty(fileDirpath)){
-            throw new FileException(ExceptionEnum.FILENOTFUND);
+            throw new FileException(ExceptionEnum.FILEPATHNOTFUND);
         }
         //指定存放上传文件的目录
         String fileDir = fileDirpath+DateUtil.getNowMonth()+"\\";

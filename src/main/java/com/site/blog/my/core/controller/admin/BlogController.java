@@ -228,7 +228,7 @@ public class BlogController {
                                              MultipartFile file) throws IOException, URISyntaxException {
         Result result = ResultGenerator.genSuccessResult("上传成功");
         if (file == null) {
-            return ResultGenerator.genFailResult("文件不存在");
+            throw new FileException(ExceptionEnum.FILENOTFUND);
         }
         //multipartFile.getOriginalFilename();
         if (!file.isEmpty()) {
@@ -249,7 +249,7 @@ public class BlogController {
                 String url =  fileReadPath+blogService.uploadFile(file);
                 result.setData(url);
             } else {
-                return ResultGenerator.genErrorResult(ExceptionEnum.FILETYPENOTFUND.getCode(), ExceptionEnum.FILETYPENOTFUND.getValue());
+                throw new FileException(ExceptionEnum.FILETYPENOTFUND);
             }
         }
 
