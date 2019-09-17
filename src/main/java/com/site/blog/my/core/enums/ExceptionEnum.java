@@ -3,6 +3,8 @@ package com.site.blog.my.core.enums;
 import org.springframework.http.HttpStatus;
 
 public enum  ExceptionEnum implements BaseEnum<Integer,String> {
+    SUCCESS(200,"成功"),
+    FAILD(500,"请求异常，请联系管理员"),
     FILENOTFUND(510,"文件不存在"),
     FILETYPENOTFUND(511,"只能上传图片"),
     FILENUPLOADFAILED(512,"文件上传本地失败"),

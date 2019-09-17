@@ -397,7 +397,7 @@ public class BlogServiceImpl implements BlogService {
         String suffix = originalFileName.substring(originalFileName.lastIndexOf('.'));
         //2、使用UUID生成新文件名
         String newFileName = UUID.randomUUID() + suffix;
-        String uploadDri = uploadDirpath +DateUtil.getNowMonth()+"\\" + newFileName;
+        String uploadDri = uploadDirpath +DateUtil.getNowMonth();
         //生成文件
         //        C:\ftpfile\img  sdasdasd.jpg
         File file = new File(dir, newFileName);

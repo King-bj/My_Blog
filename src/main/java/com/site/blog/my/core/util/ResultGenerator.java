@@ -1,48 +1,42 @@
 package com.site.blog.my.core.util;
 
+import com.site.blog.my.core.enums.ExceptionEnum;
 import org.springframework.util.StringUtils;
 
 /**
  * 响应结果生成工具
  *
- * @author 13
- * @qq交流群 796794009
- * @email 2449207463@qq.com
- * @link http://13blog.site
+ * @author lajin
  */
 public class ResultGenerator {
-    private static final String DEFAULT_SUCCESS_MESSAGE = "SUCCESS";
-    private static final String DEFAULT_FAIL_MESSAGE = "FAIL";
-    private static final int RESULT_CODE_SUCCESS = 200;
-    private static final int RESULT_CODE_SERVER_ERROR = 500;
 
     public static Result genSuccessResult() {
         Result result = new Result();
-        result.setResultCode(RESULT_CODE_SUCCESS);
-        result.setMessage(DEFAULT_SUCCESS_MESSAGE);
+        result.setResultCode(ExceptionEnum.SUCCESS.getCode());
+        result.setMessage(ExceptionEnum.SUCCESS.getValue());
         return result;
     }
 
     public static Result genSuccessResult(String message) {
         Result result = new Result();
-        result.setResultCode(RESULT_CODE_SUCCESS);
+        result.setResultCode(ExceptionEnum.SUCCESS.getCode());
         result.setMessage(message);
         return result;
     }
 
     public static Result genSuccessResult(Object data) {
         Result result = new Result();
-        result.setResultCode(RESULT_CODE_SUCCESS);
-        result.setMessage(DEFAULT_SUCCESS_MESSAGE);
+        result.setResultCode(ExceptionEnum.SUCCESS.getCode());
+        result.setMessage(ExceptionEnum.SUCCESS.getValue());
         result.setData(data);
         return result;
     }
 
     public static Result genFailResult(String message) {
         Result result = new Result();
-        result.setResultCode(RESULT_CODE_SERVER_ERROR);
+        result.setResultCode(ExceptionEnum.FAILD.getCode());
         if (StringUtils.isEmpty(message)) {
-            result.setMessage(DEFAULT_FAIL_MESSAGE);
+            result.setMessage(ExceptionEnum.FAILD.getValue());
         } else {
             result.setMessage(message);
         }

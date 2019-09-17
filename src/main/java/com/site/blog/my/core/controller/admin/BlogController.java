@@ -270,38 +270,4 @@ public class BlogController {
         }
     }
 
-
-//    @PostMapping("/blogs/insertImage")
-//    @ResponseBody
-//    public Result uploadFile(@RequestParam(name = "file") MultipartFile multipartFile) throws Exception {
-//        Result result = ResultGenerator.genSuccessResult("上传成功");
-//        if (multipartFile == null) {
-//            return ResultGenerator.genFailResult("文件不存在");
-//        }
-//        //multipartFile.getOriginalFilename();
-//        if (!multipartFile.isEmpty()) {
-//            //对文文件的全名进行截取然后在后缀名进行删选。
-//            int begin = multipartFile.getOriginalFilename().indexOf(".");
-//            int last = multipartFile.getOriginalFilename().length();
-//            //获得文件后缀名
-//            String a = multipartFile.getOriginalFilename().substring(begin + 1, last).toUpperCase();
-//            //我这边需要的xlsx文件所以说我这边直接判断就是了
-//            if (a.endsWith(ImageEnum.IMG_TYPE_PNG.getCode())
-//                    || a.endsWith(ImageEnum.IMG_TYPE_JPG.getCode())
-//                    || a.endsWith(ImageEnum.IMG_TYPE_JPEG.getCode())
-//                    || a.endsWith(ImageEnum.IMG_TYPE_DMG.getCode())
-//                    || a.endsWith(ImageEnum.IMG_TYPE_GIF.getCode())
-//                    || a.endsWith(ImageEnum.IMG_TYPE_SVG.getCode())
-//
-//                    ) {
-//                String url =  blogService.uploadFile(multipartFile);
-//                result.setData(url);
-//            } else {
-//                return ResultGenerator.genErrorResult(ExceptionEnum.FILETYPENOTFUND.getCode(), ExceptionEnum.FILETYPENOTFUND.getValue());
-//            }
-//        }
-//
-//        return result;
-//    }
-
 }

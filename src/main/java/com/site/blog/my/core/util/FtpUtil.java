@@ -5,6 +5,7 @@ import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPFile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
@@ -18,18 +19,44 @@ import java.io.InputStream;
   * @author 奇点_
   *
   */
+@Component
 public class FtpUtil {
     private static FTPClient ftpClient = new FTPClient();
     private static Logger logger = LoggerFactory.getLogger(FtpUtil.class);
+
+    private  static String ftpIp;
+    private static int ftpPort;
+    private static String ftpUsername;
+    private static String ftpPassword;
+
+    @Value(value = "${ftp.ip}")
+    public  void setFtpIp(String ftpIp) {
+        FtpUtil.ftpIp = ftpIp;
+    }
+
+    @Value(value = "${ftp.port}")
+    public  void setFtpPort(int ftpPort) {
+        FtpUtil.ftpPort = ftpPort;
+    }
+
+    @Value(value = "${ftp.username}")
+    public  void setFtpUsername(String ftpUsername) {
+        FtpUtil.ftpUsername = ftpUsername;
+    }
+
+    @Value(value = "${ftp.password}")
+    public  void setFtpPassword(String ftpPassword) {
+        FtpUtil.ftpPassword = ftpPassword;
+    }
 
     public static boolean uploadToFtp(File file,String date,String filePath){
         //FTPClient ftpClient = new FTPClient();
         try {
             //连接ftp服务器 参数填服务器的ip
-            ftpClient.connect("xxx");
+            ftpClient.connect(ftpIp,ftpPort);
 
             //进行登录 参数分别为账号 密码
-            ftpClient.login("user","xxx");
+            ftpClient.login(ftpUsername,ftpPassword);
 
             //改变工作目录（按自己需要是否改变）
             CreateDirecroty(date);

@@ -13,7 +13,7 @@ import org.springframework.web.servlet.NoHandlerFoundException;
 import java.io.IOException;
 
 /**
- * @author: lxw
+ * @author: lajin
  * @Date: 2019/2/16 20:00
  * @email:
  * @Description: 自定义异常处理
