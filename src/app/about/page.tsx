@@ -1,17 +1,11 @@
 'use client';
 
-import { useConfig } from '@/hooks/useConfig';
 import { usePage } from '@/hooks/usePage';
 import { LoadingTransition, SkeletonCard, StaggerContainer } from '@/components/LoadingComponents';
 import { CodeBlock } from '@/components/CodeBlock';
 
 export default function AboutPage() {
-  const { data: config, loading: configLoading } = useConfig();
-  const { page: aboutMePage, loading: aboutMeLoading, error: aboutMeError } = usePage('about-me');
-  const { page: aboutBlogPage, loading: aboutBlogLoading, error: aboutBlogError } = usePage('about-blog');
-
-  const loading = configLoading || aboutMeLoading || aboutBlogLoading;
-  const error = aboutMeError || aboutBlogError;
+  const { page: aboutMePage, loading, error } = usePage('about-me');
 
   if (error) {
     return (
@@ -26,7 +20,7 @@ export default function AboutPage() {
     );
   }
 
-  if (!aboutMePage || !aboutBlogPage || !config) {
+  if (!aboutMePage) {
     if (!loading) {
       return (
         <div className="content-wrapper py-12">
@@ -45,11 +39,7 @@ export default function AboutPage() {
     <div className="content-wrapper py-12">
       <div className="max-w-3xl mx-auto">
         <div className="h-8 w-32 shimmer rounded mb-8"></div>
-        
-        <div className="space-y-8">
-          <SkeletonCard lines={5} className="min-h-[300px]" />
-          <SkeletonCard lines={3} className="min-h-[200px]" />
-        </div>
+        <SkeletonCard lines={5} className="min-h-[300px]" />
       </div>
     </div>
   );
@@ -58,51 +48,11 @@ export default function AboutPage() {
     <div className="content-wrapper py-12">
       <div className="max-w-3xl mx-auto">
         <h1 className="text-3xl font-bold mb-8 fade-in-up">关于</h1>
-        
+
         <StaggerContainer className="space-y-8">
           <div className="card p-8">
             <div className="prose max-w-none">
               <CodeBlock html={aboutMePage?.htmlContent || ''} />
-            </div>
-            
-            <div className="mt-8 pt-6 border-t">
-              <h3 className="text-xl font-semibold mb-4">联系方式</h3>
-              <div className="flex flex-wrap gap-4">
-                {config?.social?.email && (
-                  <a
-                    href={config.social.email}
-                    className="btn-secondary transition-bounce"
-                  >
-                    邮箱
-                  </a>
-                )}
-                {config?.social?.github && (
-                  <a
-                    href={config.social.github}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="btn-secondary transition-bounce"
-                  >
-                    GitHub
-                  </a>
-                )}
-                {config?.social?.twitter && (
-                  <a
-                    href={config.social.twitter}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="btn-secondary transition-bounce"
-                  >
-                    Twitter
-                  </a>
-                )}
-              </div>
-            </div>
-          </div>
-          
-          <div className="card p-8">
-            <div className="prose max-w-none">
-              <CodeBlock html={aboutBlogPage?.htmlContent || ''} />
             </div>
           </div>
         </StaggerContainer>
@@ -112,7 +62,7 @@ export default function AboutPage() {
 
   return (
     <LoadingTransition
-      loading={loading || !aboutMePage || !aboutBlogPage || !config}
+      loading={loading || !aboutMePage}
       skeleton={skeletonContent}
     >
       {actualContent}
