@@ -1,7 +1,7 @@
 ---
 title: Kibana 通过 Docker 与 ES 对齐部署
-date: "2025-06-21"
-tags: [Docker, 容器, 运维]
+date: "2026-01-25"
+tags: [Docker, 可观测]
 description: "例如：首先需要把Kibana从DockerHub上拉取下来：统一版本7.6.2 docker pull kibana:7.6.2 docker run --name kibana -e ELASTICSEARCH_HOS..."
 published: true
 ---

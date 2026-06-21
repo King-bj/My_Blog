@@ -1,8 +1,8 @@
 ---
 title: Spark Streaming 读取 Kafka 报 OffsetOutOfRangeException
-date: "2026-02-13"
-tags: [中间件]
-description: SparkStreaming读取kakfa报错OffsetOutOfRangeException Kafka停机超过数据清理时间后，spark消费的还是停机之前的offset，然而该topic数据已经被清理了，所以报错越...
+date: "2025-12-10"
+tags: [中间件, 故障排查]
+description: "Spark Streaming 消费 Kafka 时报 OffsetOutOfRangeException：retention 清理导致旧 offset 越界，三种处理策略（earliest/latest/自定义）对比与选型建议。"
 published: true
 ---
 

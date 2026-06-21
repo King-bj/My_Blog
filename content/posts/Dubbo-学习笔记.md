@@ -1,7 +1,7 @@
 ---
 title: Dubbo 学习笔记：协议、注册中心与负载均衡
-date: "2026-01-16"
-tags: [中间件]
+date: "2026-02-28"
+tags: [中间件, 架构设计]
 description: Dubbo 调用链条 1. 服务暴露（Provider） 2. 服务引用（Consumer） 3. 服务调用 4. 结果返回 关键点：Invoker、Proxy、Filter、Protocol、Registry、Nett...
 published: true
 ---

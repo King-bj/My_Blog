@@ -220,7 +220,6 @@ export default function PostPage() {
     <LoadingTransition
       loading={loading}
       skeleton={skeletonContent}
-      delay={300}
     >
       {actualContent}
     </LoadingTransition>

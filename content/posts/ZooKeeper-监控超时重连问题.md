@@ -1,87 +1,77 @@
 ---
-title: ZooKeeper 监控超时与重连问题处理
-date: "2026-02-23"
-tags: [中间件]
-description: 更新了zookeeper，spark任务没有接收到通知更新，zookeeper通信报错连接超时 zookeeper连接断开分为recoverble以及unrecoverble两种场景，这两种的区别主要是基于Session...
+title: ZooKeeper Session 超时与 Watcher 重注册问题处理
+date: "2023-03-25"
+tags: [中间件, 故障排查]
+description: "生产环境 ZooKeeper 更新后 Spark 任务未收到通知，根因是 Session Expire 后旧 Watcher 失效。文章覆盖 Session 超时协商机制、recoverable/unrecoverable 两种断连场景，以及基于 Curator ConnectionStateListener 的 Watcher 自动重注册方案。"
 published: true
 ---
 
-# ZooKeeper 监控超时与重连问题处理
-
-> **背景：** 实时链路里同时存在 Kafka、Flink、ZooKeeper、Dubbo 等多种中间件，出问题时往往牵一发动全身，下面是当时的完整记录与思考。
+# ZooKeeper Session 超时与 Watcher 重注册问题处理
 
 ## 现象
-更新了zookeeper，spark任务没有接收到通知更新，zookeeper通信报错连接超时
 
-## 源代码
-````
-import org.apache.curator.framework.CuratorFramework;
-import org.apache.curator.framework.CuratorFrameworkFactory;
-import org.apache.curator.framework.api.CuratorWatcher;
-import org.apache.curator.retry.ExponentialBackoffRetry;
-import org.apache.zookeeper.WatchedEvent;
-import org.apache.zookeeper.Watcher;
+更新了 ZooKeeper 节点数据后，下游 Spark 任务没有收到通知、未触发索引切换，ZooKeeper 客户端日志报连接超时。
 
-public class ZooKeeperWatcherExample {
-    private static final String ZK_CONNECTION_STRING = "localhost:2181"; // ZooKeeper连接字符串
-    private static final int SESSION_TIMEOUT_MS = 5000; // 会话超时时间（毫秒）
+---
 
-    public static void main(String[] args) throws Exception {
-        // 创建Curator客户端
-        CuratorFramework client = CuratorFrameworkFactory.newClient(ZK_CONNECTION_STRING, new ExponentialBackoffRetry(1000, 3));
-        client.start();
-        // 注册Watcher监听器
-        addNodeWatcher(client, "/opt/test");
+## Session 超时原理
 
-        // 保持程序运行，以便监听节点变化
-        Thread.sleep(Integer.MAX_VALUE);
-    }
+### 超时时间的协商
 
-    private static void addNodeWatcher(CuratorFramework client, String path) throws Exception {
-        // 创建Watcher监听器
-        CuratorWatcher watcher = new CuratorWatcher() {
-            @Override
-            public void process(WatchedEvent event) throws Exception {
-                if (event.getType() == Watcher.Event.EventType.NodeDataChanged) {
-                    // 节点数据发生变化时触发
-                    byte[] data = client.getData().usingWatcher(this).forPath(path);
-                    String dataStr = new String(data);
-                    System.out.println("Node data changed: " + dataStr);
-                }
-            }
-        };
+ZooKeeper 客户端与服务端建立连接时，会提交客户端设置的 `sessionTimeout`。服务端有两个配置项：
 
-        // 注册Watcher监听指定节点的数据变化
-        byte[] data = client.getData().usingWatcher(watcher).forPath(path);
-        String dataStr = new String(data);
-        System.out.println("Initial node data: " + dataStr);
-    }
+- `minSessionTimeout`：默认 `tickTime × 2`
+- `maxSessionTimeout`：默认 `tickTime × 20`
+
+最终生效的超时时间按以下规则确定：
+
+```java
+if (clientSessionTimeout < minSessionTimeout) {
+    sessionTimeout = minSessionTimeout;
+} else if (clientSessionTimeout > maxSessionTimeout) {
+    sessionTimeout = maxSessionTimeout;
+} else {
+    sessionTimeout = clientSessionTimeout;
 }
+```
 
-````
+服务端使用 `ExpiryQueue` 将所有客户端连接按超时时间分桶管理，到期时逐桶检查。
 
-## 原因
-zookeeper连接断开分为recoverble以及unrecoverble两种场景，这两种的区别主要是基于Session的有效期，所有的client操作包括watch都是和Session关联的，当Session在超时过期时间内，重新成功建立连接，则watch会在连接建立后重新设置。但是当Session Timeout后仍然没有成功重新建立连接，那么Session则处于Expire的状态,这种情况下，ZookeeperClient会重新连接，但是Session将会是全新的一个。同时之前的状态是不会保存的。
+### 两种断连场景
 
-1）在session timeout之内连接成功
-这个时候client成功切换到连接另一个provider例如是provider2，由于zk在所有的provider上同步了session相关的数据，此时可以认为无缝迁移了。
-2）在session timeout之内没有重新连接
-这就是session expire的情况，这时候zookeeper集群会任务会话已经结束，并清除和这个session有关的所有数据，包括临时节点和注册的监视点Watcher。
-在session超时之后，如果client重新连接上了zookeeper集群，很不幸，zookeeper会发出session expired异常，且不会重建session，也就是不会重建临时数据和watcher。
-我们实现的ZookeeperProcessor是基于Apache Curator的Client封装实现的。
+| 场景 | 条件 | 结果 |
+|------|------|------|
+| **Recoverable（可恢复）** | 在 `sessionTimeout` 内重新连接成功 | Session 有效，Watcher 在重连后自动恢复 |
+| **Unrecoverable（不可恢复）** | `sessionTimeout` 到期仍未重连 | Session Expire，临时节点和 Watcher 全部被清除 |
 
-它对于Session Expire的处理是提供了处理的监听注册ConnectionStateListner，当遇到Session Expire时，执行使用者要做的逻辑。（例如：重新设置Watch）
+Session Expire 后客户端重连时，服务端返回 `SESSIONEXPIRED` 错误码，客户端抛出 `KeeperException.SessionExpiredException`，注册的 Watcher 收到 `KeeperState.Expired` 通知。**此时必须主动重建连接，并重新注册所有 Watcher。**
 
-## 原因总结
-zookeeper存在两种连接断开情况，第一种是在超时之前连接成功，可以无缝连接无需处理，第二种在超时时间之后连接，需要重新设置watch，保证可以继续进行监听。
+---
+
+## 根因分析
+
+本次更新 ZooKeeper 期间，由于维护窗口超过了客户端配置的 `sessionTimeout`，Session 进入 Expire 状态。重连成功后，之前注册的索引变更 Watcher 已被服务端清除，因此节点数据变更通知无法到达 Spark 任务。
+
+---
 
 ## 解决方案
-我们在ConnectionStateListener的stateChanged()方法中添加了对ConnectionState.RECONNECTED状态的处理逻辑。当重新连接成功时，我们调用addNodeWatcher()方法重新注册Watcher以监听节点数据的变化。
 
-请注意，在重新注册Watcher时，我们使用的是CuratorFramework对象作为参数，而不是直接使用client，这是因为在ConnectionStateListener中的stateChanged()方法中，client可能已经被关闭或不可用。因此，通过将CuratorFramework对象作为参数传递给addNodeWatcher()方法，我们可以确保在重新连接后使用正确的CuratorFramework实例重新注册Watcher。
+### 1. 调大超时时间（临时缓解）
 
-``` 
- 
+在 ZooKeeper `zoo.cfg` 中调整：
+
+```properties
+minSessionTimeout=10000
+maxSessionTimeout=60000
+```
+
+客户端连接时相应增大 `sessionTimeout` 参数。
+
+### 2. 实现 Session Expire 后的 Watcher 自动重注册（根本方案）
+
+使用 Apache Curator 的 `ConnectionStateListener`，在 `RECONNECTED` 状态时重新注册所有 Watcher：
+
+```java
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
 import org.apache.curator.framework.api.CuratorWatcher;
@@ -92,62 +82,56 @@ import org.apache.zookeeper.WatchedEvent;
 import org.apache.zookeeper.Watcher;
 
 public class ZooKeeperWatcherExample {
-    private static final String ZK_CONNECTION_STRING = "localhost:2181"; // ZooKeeper连接字符串
-    private static final int SESSION_TIMEOUT_MS = 5000; // 会话超时时间（毫秒）
-    private static final String NODE_PATH = "/opt/test"; // 监听的节点路径
+    private static final String ZK_CONNECTION_STRING = "localhost:2181";
+    private static final int SESSION_TIMEOUT_MS = 30000;
+    private static final String NODE_PATH = "/config/index-name";
 
     public static void main(String[] args) throws Exception {
-        // 创建Curator客户端
-        CuratorFramework client = CuratorFrameworkFactory.newClient(ZK_CONNECTION_STRING, SESSION_TIMEOUT_MS, SESSION_TIMEOUT_MS, new ExponentialBackoffRetry(1000, 3));
+        CuratorFramework client = CuratorFrameworkFactory.newClient(
+            ZK_CONNECTION_STRING,
+            SESSION_TIMEOUT_MS,
+            SESSION_TIMEOUT_MS,
+            new ExponentialBackoffRetry(1000, 3)
+        );
 
-        // 注册连接状态监听器
-        ConnectionStateListener connectionStateListener = new ConnectionStateListener() {
-            @Override
-            public void stateChanged(CuratorFramework curatorFramework, ConnectionState connectionState) {
-                if (connectionState == ConnectionState.LOST || connectionState == ConnectionState.SUSPENDED) {
-                    // 处理会话超时或暂停的异常情况
-                    System.out.println("ZooKeeper session lost or suspended. Connection state: " + connectionState);
-                    // 在这里执行相应的处理逻辑
-                } else if (connectionState == ConnectionState.RECONNECTED) {
-                    // 重新连接成功，重新注册Watcher
-                    try {
-                        addNodeWatcher(curatorFramework, NODE_PATH);
-                    } catch (Exception e) {
-                        System.out.println("Failed to re-register watcher after reconnection: " + e.getMessage());
-                    }
+        client.getConnectionStateListenable().addListener((curatorFramework, connectionState) -> {
+            if (connectionState == ConnectionState.LOST || connectionState == ConnectionState.SUSPENDED) {
+                System.out.println("ZooKeeper session lost/suspended: " + connectionState);
+            } else if (connectionState == ConnectionState.RECONNECTED) {
+                // Session Expire 后重连：必须重新注册 Watcher
+                try {
+                    addNodeWatcher(curatorFramework, NODE_PATH);
+                } catch (Exception e) {
+                    System.err.println("Failed to re-register watcher: " + e.getMessage());
                 }
             }
-        };
+        });
 
-        client.getConnectionStateListenable().addListener(connectionStateListener);
         client.start();
-
-        // 注册Watcher监听器
         addNodeWatcher(client, NODE_PATH);
-
-        // 保持程序运行，以便监听节点变化
-        Thread.sleep(Integer.MAX_VALUE);
+        Thread.sleep(Long.MAX_VALUE);
     }
 
     private static void addNodeWatcher(CuratorFramework client, String path) throws Exception {
-        // 创建Watcher监听器
-        CuratorWatcher watcher = new CuratorWatcher() {
-            @Override
-            public void process(WatchedEvent event) throws Exception {
-                if (event.getType() == Watcher.Event.EventType.NodeDataChanged) {
-                    // 节点数据发生变化时触发
-                    byte[] data = client.getData().usingWatcher(this).forPath(path);
-                    String dataStr = new String(data);
-                    System.out.println("Node data changed: " + dataStr);
-                }
+        CuratorWatcher watcher = event -> {
+            if (event.getType() == Watcher.Event.EventType.NodeDataChanged) {
+                byte[] data = client.getData().usingWatcher(
+                    (CuratorWatcher) e -> {}
+                ).forPath(path);
+                System.out.println("Index updated: " + new String(data));
+                // 重新注册自身，保持持续监听
+                addNodeWatcher(client, path);
             }
         };
-
-        // 注册Watcher监听指定节点的数据变化
-        byte[] data = client.getData().usingWatcher(watcher).forPath(path);
-        String dataStr = new String(data);
-        System.out.println("Initial node data: " + dataStr);
+        client.getData().usingWatcher(watcher).forPath(path);
     }
 }
-
 ```
+
+**关键点**：`RECONNECTED` 与 `LOST`/`SUSPENDED` 的区别在于 Session 是否已 Expire；Curator 的重试策略只能处理 Recoverable 断连，Session Expire 后必须在 `ConnectionStateListener` 里手动重建监听。
+
+---
+
+## 结果
+
+调整 `sessionTimeout` 并补充 Watcher 自动重注册逻辑后，ZooKeeper 维护窗口期间不再出现通知丢失，团队将此模式写入了中间件客户端编码规范。

@@ -1,16 +1,14 @@
 ---
 title: Flink 背压与日志解析规则优化实践
-date: "2026-01-23"
-tags: [中间件]
-description: 在实际的日志处理场景中，我们从 Kafka 获取不同应用的日志，并通过 Drools 规则引擎来解析日志字段。随着业务量增长，出现了以下问题： 1. 背压严重：Drools 引擎属于高耗时逻辑，当日志量增大时，数据堆积在...
+date: "2025-12-21"
+tags: [中间件, 可观测]
+description: "Kafka→Flink→Drools 日志解析链路背压优化实践：单规则拆为多规则、通配符改精确匹配、批量提交，吞吐提升 5 倍，附 Flink 背压指标解读与调优参数。"
 published: true
 ---
 
 # Flink 背压与日志解析规则优化实践
 
-> **背景：** 实时链路里同时存在 Kafka、Flink、ZooKeeper、Dubbo 等多种中间件，出问题时往往牵一发动全身，下面是当时的完整记录与思考。
-
-# Flink 背压机制与日志解析实践
+日志处理链路 Kafka → Flink → Drools → Elasticsearch 出现严重背压，以下是完整的排查过程与优化方案。
 
 ## 场景背景
 

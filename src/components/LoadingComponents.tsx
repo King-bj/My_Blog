@@ -177,7 +177,7 @@ export function LoadingTransition({
   skeleton, 
   children, 
   className = '',
-  delay = 300
+  delay = 0
 }: LoadingTransitionProps) {
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [showSkeleton, setShowSkeleton] = useState(loading);

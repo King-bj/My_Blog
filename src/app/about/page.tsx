@@ -3,6 +3,7 @@
 import { useConfig } from '@/hooks/useConfig';
 import { usePage } from '@/hooks/usePage';
 import { LoadingTransition, SkeletonCard, StaggerContainer } from '@/components/LoadingComponents';
+import { CodeBlock } from '@/components/CodeBlock';
 
 export default function AboutPage() {
   const { data: config, loading: configLoading } = useConfig();
@@ -60,10 +61,9 @@ export default function AboutPage() {
         
         <StaggerContainer className="space-y-8">
           <div className="card p-8">
-            <div 
-              className="prose prose-gray dark:prose-invert max-w-none prose-headings:text-foreground prose-p:text-muted-foreground"
-              dangerouslySetInnerHTML={{ __html: aboutMePage?.htmlContent || '' }}
-            />
+            <div className="prose max-w-none">
+              <CodeBlock html={aboutMePage?.htmlContent || ''} />
+            </div>
             
             <div className="mt-8 pt-6 border-t">
               <h3 className="text-xl font-semibold mb-4">联系方式</h3>
@@ -101,10 +101,9 @@ export default function AboutPage() {
           </div>
           
           <div className="card p-8">
-            <div 
-              className="prose prose-gray dark:prose-invert max-w-none prose-headings:text-foreground prose-p:text-muted-foreground"
-              dangerouslySetInnerHTML={{ __html: aboutBlogPage?.htmlContent || '' }}
-            />
+            <div className="prose max-w-none">
+              <CodeBlock html={aboutBlogPage?.htmlContent || ''} />
+            </div>
           </div>
         </StaggerContainer>
       </div>
@@ -115,7 +114,6 @@ export default function AboutPage() {
     <LoadingTransition
       loading={loading || !aboutMePage || !aboutBlogPage || !config}
       skeleton={skeletonContent}
-      delay={300}
     >
       {actualContent}
     </LoadingTransition>

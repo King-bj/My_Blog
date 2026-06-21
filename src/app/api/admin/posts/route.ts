@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { withAdminAuth } from '@/lib/middleware';
 import { getAllPosts } from '@/lib/posts';
+import { invalidateCache } from '@/lib/content-cache';
 import fs from 'fs';
 import path from 'path';
 import matter from 'gray-matter';
@@ -117,6 +118,8 @@ const handleCreatePost = withAdminAuth(async (request: NextRequest) => {
 
     // 写入文件
     fs.writeFileSync(filePath, fileContent, 'utf8');
+
+    invalidateCache('post:');
 
     return NextResponse.json({
       success: true,

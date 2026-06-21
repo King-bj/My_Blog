@@ -1,8 +1,8 @@
 ---
 title: FTPClient 文件传输损坏：ASCII 与 BINARY 模式踩坑
-date: "2026-05-30"
-tags: [故障排查, 实战]
-description: 用Apache的FTPClient下载文件时发现一个问题，就是下载txt文件没问题，但下载zip/tar.gz等文件时文件会被破坏，查了一下原因，原来是这样： 因为RFC959中规定了缺省的传输模式应该是ASCII的，o...
+date: "2026-05-05"
+tags: [故障排查, Java]
+description: "FTPClient 传输二进制文件损坏：RFC 959 默认 ASCII 模式会对换行符做转换，setFileType(BINARY_FILE_TYPE) 一行修复，附 ASCII 与 BINARY 模式原理对比。"
 published: true
 ---
 

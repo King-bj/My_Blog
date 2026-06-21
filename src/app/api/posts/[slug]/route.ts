@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
+import path from 'path';
 import { getPostBySlug, markdownToHtml } from '@/lib/posts';
+import { CACHE_HEADERS, withCacheHeaders } from '@/lib/api-cache';
 
 interface RouteContext {
   params: { slug: string };
@@ -23,23 +25,26 @@ export async function GET(request: NextRequest, { params }: RouteContext) {
       );
     }
 
-    let responseData: any = {
+    let responseData: Record<string, unknown> = {
       ...post
     };
 
-    // 如果需要包含HTML内容，处理markdown
     if (includeContent && post.content) {
-      const htmlContent = await markdownToHtml(post.content);
+      const statPath = path.join(process.cwd(), 'content/posts', `${slug}.md`);
+      const htmlContent = await markdownToHtml(post.content, { slug, statPath });
       responseData = {
         ...responseData,
         htmlContent
       };
     }
 
-    return NextResponse.json({
-      success: true,
-      data: responseData
-    });
+    return withCacheHeaders(
+      NextResponse.json({
+        success: true,
+        data: responseData
+      }),
+      CACHE_HEADERS.post
+    );
 
   } catch (error) {
     console.error(`❌ 获取文章 ${params.slug} 失败:`, error);

@@ -28,9 +28,7 @@ export function useTags() {
     try {
       setState(prev => ({ ...prev, loading: true, error: null }));
       
-      const response = await fetch('/api/tags', {
-        cache: 'no-cache'
-      });
+      const response = await fetch('/api/tags');
       
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -81,9 +79,7 @@ export function useTagPosts(tag: string) {
     try {
       setState(prev => ({ ...prev, loading: true, error: null }));
       
-      const response = await fetch(`/api/tags/${encodeURIComponent(tag)}`, {
-        cache: 'no-cache'
-      });
+      const response = await fetch(`/api/tags/${encodeURIComponent(tag)}`);
       
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);

@@ -1,8 +1,8 @@
 ---
 title: 交互式与非交互式 Linux SSH 连接的区别及修复建议
-date: "2025-04-17"
-tags: [Linux, 运维, 系统管理]
-description: "自动化远程执行命令时，对端服务器检测到cpu使用率升高，特定情况下达到90%，且执行的脚本为比较简单的脚本如top -n1这类脚本 通过top 跟踪执行命令，发现CPU占用高的进程是自动化执行用户的bash命令占用较高，..."
+date: "2025-12-30"
+tags: [Linux, DevOps]
+description: "交互式（PTY）与非交互式 SSH 连接的本质区别：PTY 分配开销导致简单命令 CPU 飙升，exec_command 模式的正确选型，详见完整复盘 → 一次自动化生产问题的完整复盘。"
 published: true
 ---
 
@@ -199,7 +199,7 @@ channel.exec_command(env_cmd)
 比如执行：
 
 ```
-ssh root@192.168.140.74 'top -n1'
+ssh root@<target-server> 'top -n1'
 ```
 
 会报错：
@@ -224,7 +224,7 @@ TERM environment variable not set.
 典型例子：
 
 ```
-ssh root@192.168.140.74 'sh t1.sh "$(pgrep -n -f java)"'
+ssh root@<target-server> 'sh t1.sh "$(pgrep -n -f java)"'
 ```
 
 这里我们本意是想在**远程服务器上**执行 `pgrep`，获取最新一个 Java 进程的 PID，然后传给 `t1.sh`。
@@ -250,7 +250,7 @@ bash -c 'sh t1.sh "$(pgrep -n -f java)"'
   
 
   ```
-  ssh root@192.168.140.74 'sh t1.sh "$(pgrep -n -f jav[a])"'
+  ssh root@<target-server> 'sh t1.sh "$(pgrep -n -f jav[a])"'
   ```
 
   这样 `pgrep` 命令本身是 `jav[a]`，不会匹配到 `java` 字面，避免了自匹配。
@@ -280,7 +280,7 @@ bash -c 'sh t1.sh "$(pgrep -n -f java)"'
 比如：
 
 ```
-ssh root@192.168.140.74 'sudo service restart nginx'
+ssh root@<target-server> 'sudo service restart nginx'
 ```
 
 如果需要输入密码，就会卡住或直接失败。

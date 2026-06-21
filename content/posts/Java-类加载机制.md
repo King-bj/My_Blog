@@ -1,8 +1,8 @@
 ---
 title: Java 类加载机制与双亲委派
-date: "2026-03-13"
-tags: [Java, Spring]
-description: jdk自带的 jhsdb 用hsdb参数 带图形界面的Debug hsdb 图形界面可以用universe查看堆内存的地址 使用jps 查看进程号 类加载三个阶段 3. 初始化 双亲委派： 优先委托上级类加载器进行加载，...
+date: "2025-06-10"
+tags: [Java]
+description: "Java 类加载三阶段（加载/链接/初始化）与双亲委派模型详解，含 AppClassLoader/ExtClassLoader/BootstrapClassLoader 层级及 jhsdb 调试示例。"
 published: true
 ---
 

@@ -1,7 +1,7 @@
 ---
 title: Redisson PermitExpirableSemaphore 源码解析
-date: "2025-11-28"
-tags: [源码分析, Java, 原理]
+date: "2026-03-10"
+tags: [Java, 架构设计]
 description: 在分布式任务调度、资源限流等场景中，我们常需要控制对共享资源的并发访问。标准的 RSemaphore 虽能实现并发控制，但其 permit 一旦被获取，若客户端异常退出，无法自动释放，易导致资源泄漏。 RPermitEx...
 published: true
 ---

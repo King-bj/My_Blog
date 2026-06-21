@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { withAdminAuth } from '@/lib/middleware';
+import { invalidateCache } from '@/lib/content-cache';
 import fs from 'fs';
 import path from 'path';
 import matter from 'gray-matter';
@@ -100,6 +101,8 @@ const handleUpdatePost = withAdminAuth(async (request: NextRequest, { params }: 
       fs.writeFileSync(currentFilePath, fileContent, 'utf8');
     }
 
+    invalidateCache('post:');
+
     return NextResponse.json({
       success: true,
       message: '文章更新成功',
@@ -130,6 +133,8 @@ const handleDeletePost = withAdminAuth(async (request: NextRequest, { params }: 
     }
 
     fs.unlinkSync(filePath);
+
+    invalidateCache('post:');
 
     return NextResponse.json({
       success: true,

@@ -13,8 +13,33 @@ export function CodeBlock({ html }: CodeBlockProps) {
   useEffect(() => {
     if (!codeRef.current) return;
 
+    const renderMermaidDiagrams = async () => {
+      const mermaidNodes = codeRef.current?.querySelectorAll(
+        '.mermaid:not([data-rendered="true"])'
+      );
+      if (!mermaidNodes?.length) return;
+
+      const { default: mermaid } = await import('mermaid');
+      const isDark = document.documentElement.classList.contains('dark');
+
+      mermaid.initialize({
+        startOnLoad: false,
+        theme: isDark ? 'dark' : 'neutral',
+        securityLevel: 'loose',
+      });
+
+      try {
+        await mermaid.run({ nodes: Array.from(mermaidNodes) as HTMLElement[] });
+        mermaidNodes.forEach((node) => node.setAttribute('data-rendered', 'true'));
+      } catch (error) {
+        console.error('Failed to render mermaid diagram:', error);
+      }
+    };
+
     // 等待一个微任务周期，确保 DOM 已经更新
     const timeoutId = setTimeout(() => {
+      void renderMermaidDiagrams();
+
       const codeBlocks = codeRef.current?.querySelectorAll('pre[class*="language-"]');
       
       if (!codeBlocks) return;

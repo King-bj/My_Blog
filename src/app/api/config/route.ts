@@ -2,8 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { loadServerSiteConfig as getSiteConfigServer, saveServerSiteConfig, validateSiteConfig } from '@/lib/config.server';
 import { extractTokenFromRequest, verifyToken } from '@/lib/auth';
 import { SiteConfig } from '@/types';
+import { CACHE_HEADERS, withCacheHeaders } from '@/lib/api-cache';
 
-// 强制动态渲染，禁用缓存
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
@@ -16,13 +16,7 @@ export async function GET() {
       data: config
     });
     
-    // 禁用缓存，确保每次都获取最新配置
-    response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
-    response.headers.set('Pragma', 'no-cache');
-    response.headers.set('Expires', '0');
-    response.headers.set('Surrogate-Control', 'no-store');
-    
-    return response;
+    return withCacheHeaders(response, CACHE_HEADERS.config);
   } catch (error) {
     console.error('❌ 配置API错误:', error);
     return NextResponse.json(
@@ -38,7 +32,6 @@ export async function GET() {
 
 export async function PUT(request: NextRequest) {
   try {
-    // 使用完整的权限验证逻辑
     const token = extractTokenFromRequest(request);
     
     if (!token) {
@@ -68,7 +61,6 @@ export async function PUT(request: NextRequest) {
     const body = await request.json();
     const config = body as Partial<SiteConfig>;
 
-    // 验证配置数据
     const validationErrors = validateSiteConfig(config);
     if (validationErrors.length > 0) {
       return NextResponse.json(
@@ -81,7 +73,6 @@ export async function PUT(request: NextRequest) {
       );
     }
 
-    // 保存配置
     const completeConfig = config as SiteConfig;
     saveServerSiteConfig(completeConfig);
     
@@ -91,13 +82,7 @@ export async function PUT(request: NextRequest) {
       message: '配置保存成功'
     });
     
-    // 禁用缓存
-    response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
-    response.headers.set('Pragma', 'no-cache');
-    response.headers.set('Expires', '0');
-    response.headers.set('Surrogate-Control', 'no-store');
-    
-    return response;
+    return withCacheHeaders(response, CACHE_HEADERS.config);
   } catch (error) {
     console.error('❌ 配置保存API错误:', error);
     return NextResponse.json(

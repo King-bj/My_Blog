@@ -26,6 +26,23 @@ fix_permissions() {
         adduser --system --uid $LOCAL_USER_ID --ingroup nodejs --shell /bin/bash nextjs
     fi
     
+    # 权限已正确时跳过耗时的递归 chown/find
+    permissions_ok=true
+    for dir in "/app/content" "/app/config"; do
+        if [ -d "$dir" ]; then
+            owner=$(stat -c '%U:%G' "$dir" 2>/dev/null || echo "")
+            if [ "$owner" != "nextjs:nodejs" ]; then
+                permissions_ok=false
+                break
+            fi
+        fi
+    done
+
+    if [ "$permissions_ok" = "true" ]; then
+        echo "✅ 权限已正确，跳过修复"
+        return
+    fi
+
     # 确保关键目录存在并设置正确权限
     for dir in "/app/content" "/app/config"; do
         if [ -d "$dir" ]; then
@@ -309,6 +326,10 @@ init_content
 init_config
 
 echo "🎉 初始化完成，启动应用..."
+
+if [ "$1" = "node" ] && [ "$2" = "server.js" ]; then
+    exec su-exec nextjs /app/start-with-prewarm.sh
+fi
 
 # 使用 su-exec 以正确的用户身份启动应用
 exec su-exec nextjs "$@"

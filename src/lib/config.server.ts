@@ -1,6 +1,7 @@
 import { SiteConfig } from '@/types';
 import fs from 'fs';
 import path from 'path';
+import { getCached, invalidateCache } from './content-cache';
 
 /**
  * 生成随机八位字符串
@@ -51,43 +52,35 @@ function ensureConfigCompleteness(config: Partial<SiteConfig>): SiteConfig {
  * 仅在服务端运行，支持从Docker挂载目录动态加载配置
  */
 export function loadServerSiteConfig(): SiteConfig {
-  // 配置文件路径优先级：
-  // 1. Docker挂载的配置目录 /app/config/site.config.json
-  // 2. 项目根目录的配置文件
-  
   const dockerConfigPath = '/app/config/site.config.json';
   const localConfigPath = path.resolve(process.cwd(), 'config/site.config.json');
   
   let configPath = localConfigPath;
-  let isDockerConfig = false;
   
-  // 在生产环境中，优先使用挂载的配置
   if (process.env.NODE_ENV === 'production' && fs.existsSync(dockerConfigPath)) {
     configPath = dockerConfigPath;
-    isDockerConfig = true;
     console.log('📖 加载Docker挂载的JSON配置文件:', dockerConfigPath);
   } else if (fs.existsSync(localConfigPath)) {
     console.log('📖 加载本地JSON配置文件:', localConfigPath);
   } else {
-    // 在构建时，配置文件可能不存在，直接返回默认配置，不记录警告
     if (process.env.NODE_ENV !== 'production') {
       console.log('📄 使用默认配置（构建时或开发时）');
     }
     return getDefaultConfig();
   }
-  
-  try {
-    // 读取JSON配置文件
-    const configData = fs.readFileSync(configPath, 'utf-8');
-    const config = JSON.parse(configData) as Partial<SiteConfig>;
-    return ensureConfigCompleteness(config);
-  } catch (error) {
-    // 只在真正的错误时才记录
-    if (fs.existsSync(configPath)) {
-      console.error('❌ JSON配置文件存在但解析失败:', error);
+
+  return getCached('config', configPath, () => {
+    try {
+      const configData = fs.readFileSync(configPath, 'utf-8');
+      const config = JSON.parse(configData) as Partial<SiteConfig>;
+      return ensureConfigCompleteness(config);
+    } catch (error) {
+      if (fs.existsSync(configPath)) {
+        console.error('❌ JSON配置文件存在但解析失败:', error);
+      }
+      return getDefaultConfig();
     }
-    return getDefaultConfig();
-  }
+  });
 }
 
 /**
@@ -122,6 +115,8 @@ export function saveServerSiteConfig(config: SiteConfig): void {
     // 写入JSON文件，格式化输出
     const configData = JSON.stringify(completeConfig, null, 2);
     fs.writeFileSync(configPath, configData, 'utf-8');
+    
+    invalidateCache('config');
     
     console.log('✅ 配置保存成功:', configPath);
   } catch (error) {

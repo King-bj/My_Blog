@@ -102,7 +102,6 @@ export default function TagsPage() {
     <LoadingTransition
       loading={loading}
       skeleton={skeletonContent}
-      delay={300}
     >
       {actualContent}
     </LoadingTransition>

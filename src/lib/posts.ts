@@ -2,6 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import matter from 'gray-matter';
 import { remark } from 'remark';
+import remarkGfm from 'remark-gfm';
 import remarkHtml from 'remark-html';
 import { rehype } from 'rehype';
 import rehypePrismPlus from 'rehype-prism-plus';
@@ -9,6 +10,12 @@ import rehypeSlug from 'rehype-slug';
 import rehypeStringify from 'rehype-stringify';
 import { Post, PostMeta, PostFrontmatter } from '@/types';
 import { calculateReadingTime, generateExcerpt } from './utils';
+import {
+  getCached,
+  getCachedAsync,
+  getCachedByMtime,
+  getDirectoryLatestMtime,
+} from './content-cache';
 
 const postsDirectory = path.join(process.cwd(), 'content/posts');
 
@@ -23,7 +30,7 @@ export function getAllPostSlugs(): string[] {
     .map(fileName => fileName.replace(/\.md$/, ''));
 }
 
-export function getPostBySlug(slug: string): Post | null {
+function readPostBySlug(slug: string): Post | null {
   try {
     const fullPath = path.join(postsDirectory, `${slug}.md`);
     
@@ -36,7 +43,6 @@ export function getPostBySlug(slug: string): Post | null {
     
     const frontmatter = data as PostFrontmatter;
     
-    // 如果文章未发布，返回 null
     if (frontmatter.published === false) {
       return null;
     }
@@ -62,21 +68,31 @@ export function getPostBySlug(slug: string): Post | null {
   }
 }
 
-export function getAllPosts(): PostMeta[] {
-  const slugs = getAllPostSlugs();
-  const posts = slugs
-    .map(slug => {
-      const post = getPostBySlug(slug);
-      if (!post) return null;
-      
-      // 只返回元数据，不包含内容
-      const { content, ...meta } = post;
-      return meta;
-    })
-    .filter((post): post is PostMeta => post !== null)
-    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+export function getPostBySlug(slug: string): Post | null {
+  const fullPath = path.join(postsDirectory, `${slug}.md`);
+  return getCached(`post:${slug}`, fullPath, () => readPostBySlug(slug));
+}
 
-  return posts;
+export function getAllPosts(): PostMeta[] {
+  return getCachedByMtime(
+    'posts-index',
+    getDirectoryLatestMtime(postsDirectory),
+    () => {
+      const slugs = getAllPostSlugs();
+      const posts = slugs
+        .map(slug => {
+          const post = getPostBySlug(slug);
+          if (!post) return null;
+
+          const { content, ...meta } = post;
+          return meta;
+        })
+        .filter((post): post is PostMeta => post !== null)
+        .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+
+      return posts;
+    }
+  );
 }
 
 export function getPostsByTag(tag: string): PostMeta[] {
@@ -123,23 +139,66 @@ export function getPaginatedPosts(page: number = 1, limit: number = 6) {
   };
 }
 
-export async function markdownToHtml(markdown: string): Promise<string> {
-  // 首先将 markdown 转换为 HTML
+function extractMermaidBlocks(markdown: string): {
+  markdown: string;
+  blocks: string[];
+} {
+  const blocks: string[] = [];
+  const processedMarkdown = markdown.replace(
+    /```mermaid\s*\n([\s\S]*?)```/gi,
+    (_, code: string) => {
+      const index = blocks.length;
+      blocks.push(code.trim());
+      return `\n\n<div class="mermaid-placeholder" data-index="${index}"></div>\n\n`;
+    }
+  );
+
+  return { markdown: processedMarkdown, blocks };
+}
+
+function restoreMermaidBlocks(html: string, blocks: string[]): string {
+  if (blocks.length === 0) {
+    return html;
+  }
+
+  return html.replace(
+    /<div class="mermaid-placeholder" data-index="(\d+)"><\/div>/g,
+    (_, index: string) => `<div class="mermaid">${blocks[Number(index)]}</div>`
+  );
+}
+
+async function renderMarkdownToHtml(markdown: string): Promise<string> {
+  const { markdown: markdownWithoutMermaid, blocks } = extractMermaidBlocks(markdown);
+
   const remarkResult = await remark()
+    .use(remarkGfm)
     .use(remarkHtml, { sanitize: false })
-    .process(markdown);
+    .process(markdownWithoutMermaid);
     
-  // 然后使用 rehype 处理 HTML，添加代码高亮和标题锚点
   const rehypeResult = await rehype()
-    .use(rehypeSlug) // 为标题添加ID
+    .use(rehypeSlug)
     .use(rehypePrismPlus, {
       showLineNumbers: true,
       ignoreMissing: true,
-      // 确保行号功能正确启用
       lineNumbersStyle: true
     })
     .use(rehypeStringify)
     .process(remarkResult.toString());
     
-  return rehypeResult.toString();
+  return restoreMermaidBlocks(rehypeResult.toString(), blocks);
+}
+
+export async function markdownToHtml(
+  markdown: string,
+  options?: { slug?: string; statPath?: string }
+): Promise<string> {
+  if (options?.slug && options?.statPath) {
+    return getCachedAsync(
+      `html:${options.slug}`,
+      options.statPath,
+      () => renderMarkdownToHtml(markdown)
+    );
+  }
+
+  return renderMarkdownToHtml(markdown);
 }

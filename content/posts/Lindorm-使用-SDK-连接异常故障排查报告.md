@@ -1,8 +1,8 @@
 ---
 title: Lindorm SDK 连接异常故障排查报告
-date: "2025-08-27"
-tags: [监控, 可观测, 运维]
-description: 现象：Lindom通过api能正常访问，通过prometheus配置数据源，test会报400错误，但不影响正常查询到数据，通过SDK访问，理论上应该一致，但实际请求查询接口报错，错误码0，msg null，难以直接定位...
+date: "2026-06-21"
+tags: [故障排查, 可观测]
+description: "Lindorm SDK 连接异常排查：Arthas watch 拦截 OkHttp 层定位请求路径差异，根因为 SDK 默认 gRPC 端口与 HTTP 端口不一致，附完整排查日志与修复方案。"
 published: true
 ---
 
@@ -28,9 +28,8 @@ published: true
   ---
   
 2. 查看应用层面的请求参数
-
   LindormTSDBClientImpl.query 的三个参数：
-
+```shell
   watch com.aliyun.lindorm.tsdb.client.impl.LindormTSDBClientImpl query 'params' -x 2
 
   输出示例：
@@ -40,13 +39,13 @@ published: true
     @String[SELECT COUNT(*) as cnt FROM udp_packet WHERE plan_id = 'it_mock_batch_1781238373281_task1_0' AND mid = 'task1'],
     @Integer[1000],
   ]
-
+```
   ---
 
 3. 查看http层面的请求参数
 
   拦截 OkHttp 层，拿到完整 URL、Headers、Method
-
+```shell
   watch com.aliyun.lindorm.tsdb.client.shaded.com.squareup.okhttp3.OkHttpClient newCall '{params[0].method(), params[0].url().toString(), params[0].headers()}' -x 3
 
   输出示例：
@@ -63,11 +62,11 @@ published: true
         ],
     ],
   ]
-
+```
   ---
 
 4. 查看实际的请求SQL
-
+```shell
   watch com.aliyun.lindorm.tsdb.client.shaded.com.squareup.okhttp3.RequestBody create '{params}' -x 3
 
   输出示例：
@@ -88,5 +87,5 @@ published: true
           @String[SELECT COUNT(*) as cnt FROM udp_packet WHERE plan_id = 'it_mock_batch_1781238373281_task1_0' AND mid = 'task1'],
       ],
   ]
-
+```
   排查后，发现是nacos配置的lindorm数据库是 ${}  取值，导致返回异常，接口没有正常返回数据库不存在等错误而是返回0错误嘛，打印请求的url和参数后修正该问题解决。

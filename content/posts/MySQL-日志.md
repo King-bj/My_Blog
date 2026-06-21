@@ -1,7 +1,7 @@
 ---
 title: MySQL 三大日志：redo / undo / binlog 全梳理
-date: "2025-12-18"
-tags: [数据库, MySQL]
+date: "2024-04-10"
+tags: [MySQL, 架构设计]
 description: undo log 回滚数据，以行为单位，记录数据每次的变更，一行记录有多个版本并存 多版本并发控制，即快照读（一致性读），让查询操作可以去访问历史版本 trxid 修改的事务ID roll ptr是指向了上个版本，快照读...
 published: true
 ---

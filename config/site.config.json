@@ -1,17 +1,16 @@
 {
-  "title": "Tiny Blog",
-  "description": "😜Yes, I broke it. No, I didn't mean to. Yes, I learned something.",
-  "introduction": "\"Do not go gentle into that good night. Old age should burn and rave at close of day. Rage, rage against the dying of the light.\"",
+  "title": "King`s Blog",
+  "description": "从日志到链路，从监控到稳定性，记录真实生产环境中的架构实践与故障复盘。",
+  "introduction": "9年平台研发经验，专注于企业级可观测平台建设。这里记录日志平台、监控与APM、自动化运维、云原生架构，以及那些在生产环境中踩过的坑、解决过的问题和沉淀下来的思考。",
   "author": {
-    "name": "Unknown",
-    "email": "blog@example.com",
-    "github": "github-username"
+    "name": "king",
+    "email": "jlnwcy@gmail.com",
+    "github": "king-bj"
   },
-  "url": "https://your-blog.com",
+  "url": "http://docs.jinla.fun",
   "social": {
-    "github": "https://github.com/Tiny-Blog",
-    "twitter": "https://twitter.com/username",
-    "email": "someone@gmail.com"
+    "github": "https://github.com/King-bj",
+    "email": "jlnwcy@gmail.com"
   },
   "theme": {
     "primaryColor": "#3b82f6"

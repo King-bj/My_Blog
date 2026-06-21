@@ -1,8 +1,8 @@
 ---
 title: DEMO 环境 Linux Cache 占用居高不下问题分析
-date: "2026-05-20"
-tags: [故障排查, 实战]
-description: 说明：2023年7月4日开始关注缓存占用问题 排查中使用命令 free -h hcache -top 10 通过对操作系统buff/cache缓存内容深入分析，以及对监控易系统的停服排查，基本可以确定缓存占用内存超高是由...
+date: "2026-05-10"
+tags: [故障排查, Linux]
+description: "Linux buff/cache 持续增长问题分析：hcache 定位热点文件，时间线与监控服务停服节点关联，确认根因为日志服务频繁读写大文件，附清理策略与预防措施。"
 published: true
 ---
 

@@ -1,7 +1,7 @@
 ---
 title: MySQL 前缀索引在逆序扫描中的边界比较缺陷分析
-date: "2025-12-08"
-tags: [数据库, MySQL]
+date: "2025-04-15"
+tags: [MySQL, 故障排查]
 description: "——基于 MySQL 8.0.35 及更早版本的执行引擎行为 适用版本：MySQL 8.0.0 ~ 8.0.35 修复版本：MySQL 8.0.36（Commit: a5f3f3d3a2b） 影响范围：使用前缀索引（Pr..."
 published: true
 ---

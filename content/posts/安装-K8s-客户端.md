@@ -1,8 +1,8 @@
 ---
 title: 一条命令搞定 kubectl 客户端安装
-date: "2025-08-16"
-tags: [Kubernetes, K8s, 云原生, 运维]
-description: install -o prouser -g prouser -m 0755 kubectl ~/.local/bin/kubectl
+date: "2025-06-13"
+tags: [K8s, DevOps]
+description: "一条命令搞定 kubectl 安装：curl 下载二进制到 ~/.local/bin，设置 PATH、切换 context 与多集群管理，含国内镜像加速方案。"
 published: true
 ---
 

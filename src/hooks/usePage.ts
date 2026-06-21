@@ -26,9 +26,7 @@ export function usePage(slug: string) {
     try {
       setState(prev => ({ ...prev, loading: true, error: null }));
       
-      const response = await fetch(`/api/pages/${encodeURIComponent(slug)}`, {
-        cache: 'no-cache'
-      });
+      const response = await fetch(`/api/pages/${encodeURIComponent(slug)}`);
       
       if (!response.ok) {
         if (response.status === 404) {

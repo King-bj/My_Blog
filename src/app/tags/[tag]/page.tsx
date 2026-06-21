@@ -117,7 +117,6 @@ export default function TagPostsPage() {
     <LoadingTransition
       loading={loading}
       skeleton={skeletonContent}
-      delay={300}
     >
       {actualContent}
     </LoadingTransition>

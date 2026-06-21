@@ -1,7 +1,7 @@
 ---
 title: Spring Boot 启动加载的 12 个关键步骤
-date: "2026-03-24"
-tags: [Java, Spring]
+date: "2023-07-10"
+tags: [Java]
 description: 加载步骤12个 ApplicationContext 只是外部容器，核心的工作还是BeanFactory ApplicationContext refresh 12个步骤 1是准备工作 2-6创建和准备 BeanFact...
 published: true
 ---

@@ -1,8 +1,8 @@
 ---
 title: Kubernetes API 设计理念解读
-date: "2025-08-06"
-tags: [Kubernetes, K8s, 云原生, 运维]
-description: 所有 API 应该是声明式的。指API应该描述状态而不是描述步骤，同时隐含了API应该是名词性质的。用户描述目标状态（What），系统负责实现过程（How）。比如yaml 的模式，replicas：3 表达了希望系统始终...
+date: "2026-06-18"
+tags: [K8s, 架构设计]
+description: "K8s API 设计哲学：资源名词化、GroupVersionResource 分组、声明式优于命令式，以及 Finalizer 和 OwnerReference 扩展机制的设计意图。"
 published: true
 ---
 

@@ -42,9 +42,7 @@ export function usePosts(options: UsePostsOptions = {}) {
       if (options.tag) params.set('tag', options.tag);
       if (options.paginated) params.set('paginated', 'true');
 
-      const response = await fetch(`/api/posts?${params}`, {
-        cache: 'no-cache'
-      });
+      const response = await fetch(`/api/posts?${params}`);
       
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);

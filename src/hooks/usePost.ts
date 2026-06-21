@@ -26,9 +26,7 @@ export function usePost(slug: string, includeContent: boolean = true) {
       const params = new URLSearchParams();
       if (!includeContent) params.set('includeContent', 'false');
 
-      const response = await fetch(`/api/posts/${encodeURIComponent(slug)}?${params}`, {
-        cache: 'no-cache'
-      });
+      const response = await fetch(`/api/posts/${encodeURIComponent(slug)}?${params}`);
       
       if (!response.ok) {
         if (response.status === 404) {

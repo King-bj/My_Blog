@@ -1,8 +1,8 @@
 ---
 title: Kubernetes 高频命令速查表
-date: "2025-07-19"
-tags: [Kubernetes, K8s, 云原生, 运维]
-description: 所有命令后加上 -n 即为在该命名命名空间下执行命令，不加则为在默认命名空间下执行命令。如： 查询所有pod 一般除了pvc，只建议使用删除yaml运行的所有内容删除服务，以避免删除错误。 pvc为持久化存储，只有当需要...
+date: "2026-06-15"
+tags: [K8s, DevOps]
+description: "kubectl 高频运维命令速查：查看/进入/重启 Pod、查看日志、管理 ConfigMap、PVC 删除注意事项，生产环境必备操作手册。"
 published: true
 ---
 
@@ -40,7 +40,7 @@ docker load -i <镜像名>.tar
 ##### 镜像打标签
 
 ```
-docker tag hub.bigitom.com/<镜像名>:<标签名> <私仓地址>/<镜像名>:<标签名>
+docker tag <源镜像>:<标签名> <私仓地址>/<镜像名>:<标签名>
 ```
 
 ##### 镜像推送到私库
@@ -250,4 +250,4 @@ kubectl delete  svc  <service名称>
 
 kube-prompt
 
-kubectl port-forward --address 0.0.0.0 service/quickstart-es-http     9200:9200  -n middleware
+kubectl port-forward --address 0.0.0.0 service/<service名称> <本地端口>:<服务端口> -n <命名空间>

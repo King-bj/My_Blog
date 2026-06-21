@@ -1,8 +1,8 @@
 ---
 title: Kubernetes 基础知识梳理
-date: "2025-07-11"
-tags: [Kubernetes, K8s, 云原生, 运维]
-description: "1. Pod: Pod 是 Kubernetes 中的基本单元，代表在集群中运行的一个或多个紧密相关的容器。每个 Pod 都有一个特定的网络 IP，容器在 Pod 中共享网络命名空间、IP 地址和端口号。 2. Node..."
+date: "2026-06-16"
+tags: [K8s, DevOps]
+description: "Kubernetes 核心概念速查：Pod、Node、Service、Deployment、StatefulSet、PV/PVC 的定义与使用场景，附生产常见问题梳理。"
 published: true
 ---
 

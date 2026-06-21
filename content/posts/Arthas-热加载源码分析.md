@@ -1,8 +1,8 @@
 ---
 title: Arthas Attach 与热加载源码分析
-date: "2025-11-12"
-tags: [源码分析, Java, 原理]
-description: "Arthas 通过 JDK Attach API 动态连接到线上目标 JVM，并在目标进程内加载 agent，启动 Telnet/HTTP 服务端，实现在线诊断。理解其关键链路，能帮助我们在本地最小化复现\"attach..."
+date: "2025-09-25"
+tags: [Java, 故障排查]
+description: "Arthas 热加载源码分析：JDK Attach API → Agent 加载 → Telnet 诊断链路，理解 Instrumentation.retransformClasses 的字节码替换机制。"
 published: true
 ---
 

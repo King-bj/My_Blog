@@ -1,8 +1,8 @@
 ---
 title: SkyWalking 源码分析思维笔记
-date: "2025-09-06"
-tags: [监控, 可观测, 运维]
-description: 1. 初始化配置 2. 加载插件 3. 加载服务
+date: "2026-05-22"
+tags: [可观测, Java]
+description: "SkyWalking 源码导读：插件 SPI 加载流程、ServiceManager 生命周期、GRPCChannelManager 连接管理与 Agent 启动链路的思维笔记。"
 published: true
 ---
 

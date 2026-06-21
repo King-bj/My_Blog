@@ -1,7 +1,7 @@
 ---
 title: Dockerfile 高频指令对照表：FROM / RUN / COPY / ENV / EXPOSE / ENTRYPOINT
-date: "2025-06-10"
-tags: [Docker, 容器, 运维]
+date: "2026-01-20"
+tags: [Docker, DevOps]
 description: Docker 实战中沉淀下来的命令与配置。
 published: true
 ---

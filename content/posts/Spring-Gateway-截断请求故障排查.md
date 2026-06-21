@@ -1,9 +1,9 @@
 ---
 title: Spring Gateway 请求被截断的故障排查
-date: "2026-03-31"
-tags: [Java, Spring]
+date: "2026-05-05"
+tags: [Java, 故障排查]
 description: 现象： 相同的请求，有时候正常返回，有时候返回数据被阶段。 排查：排查nginx返回，nginx返回数据包日志显示无异常。直接请求服务，返回数据无异常，初步定位为gateway问题 安装arathas 定位gateway...
-published: true
+published: false
 ---
 
 # Spring Gateway 请求被截断的故障排查
@@ -37,7 +37,7 @@ ls -la /proc/2346018/root/tmp
  ./as.sh 2346018 --mcp-endpoint '/mcp' --target-ip 0.0.0.0
 
 访问
-http://192.168.1.104:8563/mcp
+http://<arthas-server>:8563/mcp
 
 配置mcp服务
 
@@ -55,7 +55,7 @@ http://192.168.1.104:8563/mcp
 
 接口：
 
-http://192.168.1.104/power-api/powerapm/extend/segment/queryBasicTraces
+http://<gateway-server>/api/apm/traces
 
 入参：
 {"traceId":"","orderField":"start","direction":"DESC","pageNum":1,"pageSize":10,"serviceId":"","start":"2026-05-09 132700","end":"2026-05-09 135700","step":"CUSTOM","requestTypeList":[]}

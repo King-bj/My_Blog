@@ -1,8 +1,8 @@
 ---
 title: CPU 使用率高的分析方法与自动化脚本
-date: "2025-04-01"
-tags: [Linux, 运维, 系统管理]
-description: 运维日常里用得到的 Linux 操作记录。
+date: "2026-04-30"
+tags: [Linux, DevOps]
+description: "CPU 使用率飙升的系统化排查方法：top/ps 定位热点进程、perf/jstack 分析热点栈，配合自动化采集脚本实现周期性 CPU 快照与告警联动。"
 published: true
 ---
 

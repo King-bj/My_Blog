@@ -1,8 +1,8 @@
 ---
 title: Helm 入门：从 kubectl apply 到包管理
-date: "2025-07-09"
-tags: [Kubernetes, K8s, 云原生, 运维]
-description: 不同环境只维护 values-.yaml，模板保持唯一来源，避免 YAML 漂移。
+date: "2026-06-17"
+tags: [K8s, DevOps]
+description: "从 kubectl apply 到 Helm 包管理：Chart 结构、values 多环境覆盖、Release 生命周期管理与常用调试命令，附多环境部署实践。"
 published: true
 ---
 

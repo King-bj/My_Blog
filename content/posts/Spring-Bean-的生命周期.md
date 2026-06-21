@@ -1,42 +1,82 @@
 ---
 title: Spring Bean 的完整生命周期
-date: "2026-03-21"
-tags: [Java, Spring]
-description: doGetBean 方法开始 spring bean都是懒加载，在第一次获取的时候才创建bean的实例
+date: "2023-06-25"
+tags: [Java]
+description: "Spring Bean 从 doGetBean 开始的完整生命周期：三级缓存机制、四种 Scope、依赖注入流程，以及 BeanPostProcessor 在初始化前后的扩展点。"
 published: true
 ---
 
 # Spring Bean 的完整生命周期
 
-> **背景：** Spring / Java 是项目的主技术栈，多数线上事故最终都要落到 JVM 与 Spring 容器层面，下面是当时的完整记录与思考。
+> **背景：** Spring / Java 是项目的主技术栈，下面梳理了 Spring 容器加载 Bean 的完整流程。
 
-doGetBean 方法开始
-spring bean都是懒加载，在第一次获取的时候才创建bean的实例
+## 核心入口：doGetBean
 
-- 阶段1 处理名称，检查缓存 
-   - 别名解析为实际名称，在进行后续处理
-   - 若要FactoryBean本身，需要使用&名称获取
-   - singletonOjbects是一级缓存，放单例成品对香港
-   - singletonFactories 是三级缓存，放单例工厂，解决循环依赖问题
-   - earlySingletonObjects 二级缓存，放单例工厂的产品，可称为提前单例对象，解决有需要产生代理的情况下，产生的循环依赖问题
-- 阶段2 处理父子容器 
-   - 父子容器的bean名称可以重复
-   - 优先找子容器的bean，找到了直接返回，找不到继续到父容器找
-- 阶段3 dependsOn 
-   - 用在非显式依赖的bean的创建顺序控制（a dependsOn b)
-- 阶段4 按Scope创建bean 
-   - scope理解为从xxx范围内查找这个bean更贴切
-   - single 单例 从refresh 创建 close时销毁 BeanFactory会记录哪些bean要调用销毁方法，从单例池范围内获取bean，如果没有，就创建并放入单例池
-   - prototype 多例 首次使用时创建，并需要手动调用destorybean调用销毁方法  从不缓存bean，每次都创建新的
-   - request 首次使用时创建 从request 对象范围内获取bean，如果没有，则创建并放入request
-- 创建bean
-![image.png](https://cdn.nlark.com/yuque/0/2022/png/21870099/1653444324479-58e090c9-6bde-4744-a170-9e518033303c.png#clientId=ua3ea2923-eadf-4&crop=0&crop=0&crop=1&crop=1&from=paste&height=465&id=ua993f365&margin=%5Bobject%20Object%5D&name=image.png&originHeight=665&originWidth=855&originalType=binary&ratio=1&rotation=0&showTitle=false&size=275265&status=done&style=none&taskId=u411bc851-5c38-477b-a969-a481235e005&title=&width=598.5)
-   - 创建bean实例 
-      - 通过AutowiredAnnotationBeanPostProcessor选择构造（优先选择带@autowired注解的bean创建，若有唯一的带参构造，也会入选）
-      - 默认构造（如果所有后处理器和BeanDefiniation都没找到构造，采用默认构造，即使是私有构造方法）
-   - 依赖注入 
-      - AutowiredAnnotationBeanPostProcessor注解匹配 @Autowired及@Value注解的成员，封装为InjectionMetadata进行依赖注入
-      - CommonAnnotationBeanPostProcessor注解匹配  @Resource注解的成员，封装为InjectionMetadata进行依赖注入
-      - AUTOWIRE_BY_NAME(根据名字匹配)
-      - AUTOWIRE_BY_TYPE(根据类型匹配)
-      - applyPropertyValues(即xml中 <property name ref|value/>)（精确指定）
+Bean 的创建从 `AbstractBeanFactory.doGetBean()` 开始。
+
+> **常见误区：** Spring 单例 Bean 默认是**立即实例化（eager init）**，在容器 `refresh()` 阶段就完成创建。只有标注了 `@Lazy` 或 `<bean lazy-init="true">` 的 Bean 才在第一次使用时才实例化。
+
+---
+
+## 阶段一：处理名称，检查缓存
+
+- 别名解析为实际名称
+- 若要获取 FactoryBean 本身而非其产品，需要加 `&` 前缀
+- 三级缓存查找顺序：
+  - **一级缓存** `singletonObjects`：单例成品对象
+  - **二级缓存** `earlySingletonObjects`：半成品（已实例化但未初始化），解决**有代理时**的循环依赖
+  - **三级缓存** `singletonFactories`：ObjectFactory，解决普通 Bean 的循环依赖
+
+---
+
+## 阶段二：处理父子容器
+
+- 父子容器可以有重名 Bean
+- 优先从子容器查找，找不到再到父容器
+
+---
+
+## 阶段三：dependsOn
+
+`@DependsOn` / `depends-on` 用于控制无显式依赖的 Bean 创建顺序（如 `A dependsOn B` 则先实例化 B）。
+
+---
+
+## 阶段四：按 Scope 创建 Bean
+
+| Scope | 创建时机 | 销毁时机 | 备注 |
+|-------|---------|---------|------|
+| `singleton` | 容器 `refresh()` | 容器 `close()` | 缓存在 `singletonObjects` |
+| `prototype` | 每次请求 | 手动调用 `destroyBean()` | 不缓存 |
+| `request` | 首次使用 | HTTP 请求结束 | 需 Web 环境 |
+| `session` | 首次使用 | Session 失效 | 需 Web 环境 |
+
+---
+
+## 创建 Bean 的内部流程
+
+### 1. 实例化（Instantiation）
+
+`AutowiredAnnotationBeanPostProcessor` 选择构造器优先级：
+1. 带 `@Autowired` 注解的构造器
+2. 唯一的带参构造器
+3. 默认无参构造器（包括 `private`）
+
+### 2. 依赖注入（Population）
+
+- `AutowiredAnnotationBeanPostProcessor`：处理 `@Autowired` / `@Value`
+- `CommonAnnotationBeanPostProcessor`：处理 `@Resource`
+- `AUTOWIRE_BY_NAME` / `AUTOWIRE_BY_TYPE`：XML 配置自动注入
+- `applyPropertyValues`：XML `<property>` 精确注入
+
+### 3. 初始化（Initialization）
+
+1. `Aware` 接口回调（`BeanNameAware`、`ApplicationContextAware` 等）
+2. `BeanPostProcessor.postProcessBeforeInitialization()`
+3. `InitializingBean.afterPropertiesSet()` / `@PostConstruct`
+4. 自定义 `init-method`
+5. `BeanPostProcessor.postProcessAfterInitialization()`（AOP 代理在此生成）
+
+### 4. 销毁（Destruction）
+
+容器关闭时：`@PreDestroy` → `DisposableBean.destroy()` → 自定义 `destroy-method`

@@ -64,6 +64,7 @@ COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
 # 复制启动脚本
 COPY --from=builder --chmod=755 /app/docker/docker-entrypoint.sh /app/docker-entrypoint.sh
+COPY --from=builder --chmod=755 /app/docker/start-with-prewarm.sh /app/start-with-prewarm.sh
 
 # 创建必要的目录结构
 RUN mkdir -p /app/content/posts /app/content/pages /app/config /app/public/images && \

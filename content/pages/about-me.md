@@ -17,7 +17,7 @@
 
 如果你想与我交流技术问题或者想法，欢迎通过以下方式联系我：
 
-- Email: ftfetters@gmail.com
-- GitHub: https://github.com/FT-Fetters
+- Email: jlnwcy@gmail.com
+- GitHub: https://github.com/King-bj
 
 感谢你访问我的博客，希望我的文章对你有所帮助！

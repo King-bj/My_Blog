@@ -1,8 +1,8 @@
 ---
 title: 为什么不要用 Executors，而要直接 new ThreadPoolExecutor
-date: "2026-04-03"
-tags: [Java, Spring]
-description: Spring / Java 主技术栈的原理梳理与排查记录。
+date: "2023-05-10"
+tags: [Java]
+description: "为什么不用 Executors 工厂方法：FixedThreadPool 无界队列 OOM、CachedThreadPool 无上限线程数风险，显式 new ThreadPoolExecutor 的参数含义与合理设置。"
 published: true
 ---
 

@@ -1,8 +1,8 @@
 ---
 title: Minikube 本地开发环境使用笔记
-date: "2025-08-09"
-tags: [Kubernetes, K8s, 云原生, 运维]
-description: "minikube start --driver=docker --registry-mirror=https://registry.docker-cn.com --insecure-registry=hub.bigito..."
+date: "2026-05-14"
+tags: [K8s, DevOps]
+description: "Minikube 本地多节点集群搭建：私有 Registry 配置、Ingress 启用、持久化存储与常见坑，适合 K8s 开发测试环境快速上手。"
 published: true
 ---
 
@@ -10,42 +10,37 @@ published: true
 
 > **背景：** 项目上云后，所有服务运行在 K8s 集群中，运维与开发都需要熟悉 K8s 的基本概念和高频操作，下面是当时的完整记录与思考。
 
-#启动3节点集群
-minikube start --driver=docker --registry-mirror=https://registry.docker-cn.com --insecure-registry=hub.bigitom.com --nodes 3 --cpus='8' --memory='16g' --kubernetes-version=v1.18.18
+# 启动 3 节点集群（带私有 Registry 与国内镜像加速）
+minikube start \
+  --driver=docker \
+  --registry-mirror=https://registry.docker-cn.com \
+  --insecure-registry=registry.example.com \
+  --nodes 3 \
+  --cpus='8' --memory='16g' \
+  --kubernetes-version=v1.25.15
 
-minikube start -p k8s-v2 --driver=docker --registry-mirror=https://registry.docker-cn.com --insecure-registry=hub.bigitom.com --nodes 3 --cpus='8' --memory='16g' --kubernetes-version=v1.18.18
+# 指定主机 IP 作为 API Server 地址（多网卡场景）
+minikube start \
+  --vm-driver=docker \
+  --registry-mirror=https://registry.docker-cn.com \
+  --insecure-registry=registry.example.com \
+  --kubernetes-version=v1.25.15 \
+  --apiserver-ips="<host-ip>" \
+  --apiserver-port=8443 \
+  --extra-config=kubelet.cgroup-driver=systemd \
+  --cni=calico \
+  --nodes 3 \
+  --cpus='8' --memory='16g'
 
-minikube start -p k8s-v18 --vm-driver=docker --registry-mirror=https://registry.docker-cn.com --image-mirror-country cn --insecure-registry=hub.bigitom.com --kubernetes-version=v1.18.18 --nodes 3
+# 为命名空间配置私有仓库拉取 Secret
+kubectl create secret docker-registry registry-key \
+  --docker-server=registry.example.com \
+  --docker-username=<registry-user> \
+  --docker-password=<registry-password> \
+  -n <namespace>
 
-minikube start --vm-driver=docker --registry-mirror=https://registry.docker-cn.com --image-mirror-country cn --insecure-registry=hub.bigitom.com --kubernetes-version=v1.18.18 --cpus='8' --memory='16g' --nodes 3
-
-minikube start --vm-driver=docker --registry-mirror=https://registry.docker-cn.com --image-mirror-country cn --insecure-registry=hub.bigitom.com --kubernetes-version=v1.21.14 --apiserver-ips="192.168.140.153" --apiserver-port=8443 --cpus='8' --memory='16g' --nodes 3
-
-minikube start --vm-driver=docker --registry-mirror=https://registry.docker-cn.com  --insecure-registry=hub.bigitom.com --kubernetes-version=v1.21.14 --apiserver-ips="192.168.140.153" --apiserver-port=8443 --cpus='8' --memory='16g' --nodes 3
-
-minikube start --vm-driver=docker --registry-mirror=https://registry.docker-cn.com  --insecure-registry=hub.bigitom.com  --apiserver-ips="192.168.140.153" --apiserver-port=8443 --cpus='8' --memory='16g' --nodes 3
-
-minikube start --vm-driver=docker --registry-mirror=https://registry.docker-cn.com  --insecure-registry=hub.bigitom.com --kubernetes-version=v1.25.15 --apiserver-ips="192.168.140.153" --apiserver-port=8443 --cpus='8' --memory='16g' --nodes 3
-
- 1.25.15
-
-minikube start
--p k8s-v1
---registry-mirror=https://registry.docker-cn.com
---insecure-registry=hub.bigitom.com
---image-mirror-country=cn
---driver=docker
---extra-config=kubelet.cgroup-driver=systemd
---cni=calico
---nodes 3
---cpus='8' --memory='16g'
-
-#授权
-kubectl create secret docker-registry registry-key-power --docker-server=hub.bigitom.com --docker-username=admin --docker-password=***REDACTED*** -n elastic-system
-
-kubectl create secret docker-registry registry-key-power --docker-server=hub.bigitom.com --docker-username=admin --docker-password=***REDACTED*** -n agent
-
-kubectl patch serviceaccount kafka -p '{"imagePullSecrets": [{"name": "registry-key-power"}]}'
+# 绑定 ServiceAccount 使用该 Secret 拉取镜像
+kubectl patch serviceaccount default -p '{"imagePullSecrets": [{"name": "registry-key"}]}'
 
 minikube profile list
 

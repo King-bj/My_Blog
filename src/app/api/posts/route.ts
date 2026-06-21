@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getAllPosts, getPaginatedPosts } from '@/lib/posts';
+import { CACHE_HEADERS, withCacheHeaders } from '@/lib/api-cache';
 
-// 标记为动态路由
 export const dynamic = 'force-dynamic';
 
 export async function GET(request: NextRequest) {
@@ -12,10 +12,8 @@ export async function GET(request: NextRequest) {
     const search = searchParams.get('search');
     const tag = searchParams.get('tag');
 
-    // 如果有搜索或标签过滤参数
     let posts = getAllPosts();
     
-    // 搜索过滤
     if (search) {
       const searchLower = search.toLowerCase();
       posts = posts.filter(post => 
@@ -26,7 +24,6 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // 标签过滤
     if (tag) {
       posts = posts.filter(post => 
         post.tags.some(postTag => 
@@ -35,7 +32,6 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // 如果需要分页
     if (searchParams.get('paginated') === 'true') {
       const totalPosts = posts.length;
       const totalPages = Math.ceil(totalPosts / limit);
@@ -44,26 +40,31 @@ export async function GET(request: NextRequest) {
       
       const paginatedPosts = posts.slice(startIndex, endIndex);
       
-      return NextResponse.json({
-        success: true,
-        data: {
-          posts: paginatedPosts,
-          pagination: {
-            currentPage: page,
-            totalPages,
-            totalPosts,
-            hasNextPage: page < totalPages,
-            hasPrevPage: page > 1,
+      return withCacheHeaders(
+        NextResponse.json({
+          success: true,
+          data: {
+            posts: paginatedPosts,
+            pagination: {
+              currentPage: page,
+              totalPages,
+              totalPosts,
+              hasNextPage: page < totalPages,
+              hasPrevPage: page > 1,
+            }
           }
-        }
-      });
+        }),
+        CACHE_HEADERS.posts
+      );
     }
 
-    // 返回所有文章（不分页）
-    return NextResponse.json({
-      success: true,
-      data: posts
-    });
+    return withCacheHeaders(
+      NextResponse.json({
+        success: true,
+        data: posts
+      }),
+      CACHE_HEADERS.posts
+    );
 
   } catch (error) {
     console.error('❌ 获取文章列表失败:', error);

@@ -70,7 +70,6 @@ export default function HomePage() {
     <LoadingTransition
       loading={loading || !config}
       skeleton={skeletonContent}
-      delay={300}
     >
       {actualContent}
     </LoadingTransition>

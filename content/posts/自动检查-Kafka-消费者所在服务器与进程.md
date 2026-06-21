@@ -1,8 +1,8 @@
 ---
 title: 自动反查 Kafka 消费者所在的服务器与进程
-date: "2025-11-02"
-tags: [自动化, DevOps, 运维]
-description: Kafka broker 本身记录了每个 consumer group 的成员信息，关键工具是 kafka-consumer-groups.sh： 输出里 CLIENT-ID 字段通常带了我们自定义的 host-pid...
+date: "2026-04-10"
+tags: [DevOps, 中间件]
+description: "通过 kafka-consumer-groups.sh CLIENT-ID 字段反查消费者所在主机与 PID 的自动化脚本，解决消费者异常时难以快速定位进程的问题。"
 published: true
 ---
 
@@ -14,7 +14,7 @@ Kafka 集群里某个 topic 的消费延迟告警了，但消费者分布在多�
 
 ## 目标（Task）
 
-写一个能从 broker 反查"某消费组的每个 partition 当前由哪台机器哪个进程在消费"的脚本。
+写一个能从 broker 反查"某消费组的每个 partition 当前由哪台机器在消费"的脚本。
 
 ## 行动（Action）
 
@@ -51,8 +51,8 @@ done
 输出格式：
 
 ```
-10.0.1.21  PID 13245  /opt/power-log-agent/bin/agent
-10.0.1.22  PID 18033  /opt/power-log-agent/bin/agent
+10.0.1.21  PID 13245  /opt/log-agent/bin/agent
+10.0.1.22  PID 18033  /opt/log-agent/bin/agent
 ```
 
 ### 接入运维平台

@@ -1,8 +1,8 @@
 ---
 title: Maven 一键构建 Docker 镜像的实践
-date: "2025-06-23"
-tags: [Docker, 容器, 运维]
-description: "目标: 通过maven插件实现springboot工程构建为docker镜像,并推送到镜像仓库 1. 配置远程服务器docker开启RemoteApi访问端口,详见参考文档,建议使用方法三 2. 配置本地环境变量DOCK..."
+date: "2026-01-30"
+tags: [Docker, DevOps]
+description: "Maven 插件一键构建 Docker 镜像：docker-maven-plugin 配置、Remote API 开放、镜像构建推送到私有仓库，实现 CI/CD 流水线中的镜像自动化。"
 published: true
 ---
 
@@ -32,7 +32,7 @@ published: true
         <profile>
             <id>docker</id>
             <properties>
-                <registry.name>hub.bigitom.com</registry.name>
+                <registry.name>registry.example.com</registry.name>
                 <tag.name>6.2.0</tag.name>
                 <docker.platforms>linux/amd64,linux/arm64</docker.platforms>
             </properties>
@@ -154,9 +154,9 @@ debug = true
 insecure-entitlements = [ "network.host", "security.insecure" ]
 
 [dns]
-  nameservers=["192.168.140.17"]
+  nameservers=["<dns-server-ip>"]
 
-[registry."hub.bigitom.com"]
+[registry."registry.example.com"]
   http = true
   
 ```
@@ -182,9 +182,9 @@ mvn -Pdocker docker:push
 配置~/.m2/settings.xml增加以下内容
 ```xml
         <server>
-            <id>hub.bigitom.com</id>
+            <id>registry.example.com</id>
             <username>admin</username>
-            <password>Admin@123</password>
+            <password>your-registry-password</password>
         </server>
 ```
 
