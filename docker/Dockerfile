@@ -14,7 +14,8 @@ WORKDIR /app
 
 # 安装依赖
 COPY package.json pnpm-lock.yaml* ./
-RUN corepack enable pnpm && pnpm i --frozen-lockfile
+# 固定 pnpm 版本（pnpm 11+ 需要 Node 20+，当前基础镜像是 Node 18）
+RUN corepack enable pnpm && corepack prepare pnpm@10.15.0 --activate && pnpm i --frozen-lockfile
 
 # 构建阶段
 FROM base AS builder
@@ -26,15 +27,15 @@ COPY . .
 ENV NEXT_TELEMETRY_DISABLED 1
 ENV BUILD_STANDALONE 1
 
-# 构建应用
-RUN corepack enable pnpm && pnpm build
+# 构建应用（使用与依赖安装阶段一致的 pnpm 版本）
+RUN corepack enable pnpm && corepack prepare pnpm@10.15.0 --activate && pnpm build
 
 # 生产镜像，复制所有文件并运行 Next.js
 FROM base AS runner
 WORKDIR /app
 
-# 安装必要工具：bash 和 su-exec（Alpine 原生的 gosu 替代品）
-RUN apk add --no-cache bash su-exec
+# 安装必要工具：bash、su-exec（Alpine 原生的 gosu 替代品）、wget（用于 healthcheck）
+RUN apk add --no-cache bash su-exec wget
 
 # 传递用户权限参数
 ARG USER_ID=1001
@@ -63,12 +64,12 @@ COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
 # 复制启动脚本
-COPY --from=builder --chmod=755 /app/docker/docker-entrypoint.sh /app/docker-entrypoint.sh
-COPY --from=builder --chmod=755 /app/docker/start-with-prewarm.sh /app/start-with-prewarm.sh
+COPY --from=builder  /app/docker/docker-entrypoint.sh /app/docker-entrypoint.sh
+COPY --from=builder  /app/docker/start-with-prewarm.sh /app/start-with-prewarm.sh
 
 # 创建必要的目录结构
 RUN mkdir -p /app/content/posts /app/content/pages /app/config /app/public/images && \
-    chown -R nextjs:nodejs /app/content /app/config /app/public
+    chown -R nextjs:nodejs /app/content /app/config /app/public && chmod 755 /app/*.sh
 
 # 不再使用特定用户，由 entrypoint 脚本处理权限
 # USER nextjs

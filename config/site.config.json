@@ -1,39 +1,27 @@
 {
-  "title": "King`s Blog",
-  "description": "从日志到链路，从监控到稳定性，记录真实生产环境中的架构实践与故障复盘。",
-  "introduction": "9年平台研发经验，专注于企业级可观测平台建设。这里记录日志平台、监控与APM、自动化运维、云原生架构，以及那些在生产环境中踩过的坑、解决过的问题和沉淀下来的思考。",
+  "title": "Tiny Blog",
+  "description": "一个使用 Markdown 管理的极简极客风博客",
+  "introduction": "在这里记录技术、思考与沉淀。",
   "author": {
-    "name": "king",
-    "email": "jlnwcy@gmail.com",
-    "github": "king-bj"
+    "name": "Your Name",
+    "email": "your@email.com",
+    "github": "your-github-username"
   },
-  "url": "http://docs.jinla.fun",
+  "url": "https://your-blog.com",
   "social": {
-    "github": "https://github.com/King-bj",
-    "email": "jlnwcy@gmail.com"
+    "github": "https://github.com/your-github-username",
+    "email": "your@email.com"
   },
   "theme": {
     "primaryColor": "#3b82f6"
   },
   "nav": [
-    {
-      "name": "Home",
-      "href": "/"
-    },
-    {
-      "name": "Posts",
-      "href": "/posts"
-    },
-    {
-      "name": "Tags",
-      "href": "/tags"
-    },
-    {
-      "name": "About",
-      "href": "/about"
-    }
+    { "name": "Home", "href": "/" },
+    { "name": "Posts", "href": "/posts" },
+    { "name": "Tags", "href": "/tags" },
+    { "name": "About", "href": "/about" }
   ],
   "postsPerPage": 6,
   "excerptLength": 200,
-  "secureEntrance": "e1tLk2iS"
+  "secureEntrance": "change-me-8c"
 }

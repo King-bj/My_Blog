@@ -201,11 +201,17 @@ create_docker_compose() {
     log_info "创建 docker-compose.yml 文件..."
     
     cat > docker-compose.yml << 'EOF'
-version: '3.8'
-
 services:
   blog:
-    image: fetters/tiny-blog:latest
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+      args:
+        # 使用宿主机当前用户的 UID/GID（Linux 系统）
+        # macOS/Windows 可以使用默认值 1001
+        USER_ID: ${USER_ID:-1001}
+        GROUP_ID: ${GROUP_ID:-1001}
+    image: tiny-blog:local
     container_name: tiny-blog
     ports:
       - "${BLOG_PORT:-3131}:3000"
@@ -286,17 +292,17 @@ create_data_directories() {
 # 启动 Docker 服务
 start_docker_service() {
     log_info "启动 Docker 服务..."
-    
+
     # 停止可能存在的旧容器
     $COMPOSE_CMD down 2>/dev/null || true
-    
-    # 拉取最新镜像
-    log_info "拉取最新的 Docker 镜像..."
-    $COMPOSE_CMD pull
-    
+
+    # 使用本地代码构建镜像（不拉取远程镜像）
+    log_info "使用本地代码构建 Docker 镜像..."
+    $COMPOSE_CMD build --pull=false
+
     # 启动服务
     $COMPOSE_CMD up -d
-    
+
     log_success "Docker 服务启动完成"
 }
 

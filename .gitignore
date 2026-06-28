@@ -13,8 +13,19 @@ node_modules/
 # 生产构建
 /build
 
-# 环境变量
-.env*.local
+# 环境变量（部署敏感信息）
+.env
+.env.*
+!.env.example
+docker/.env
+docker/.env.*
+
+# 部署生成的 compose 文件
+/docker-compose.yml
+/docker-compose.*.yml
+
+# 生产环境 compose（实际部署配置）
+/docker/docker-compose.prod.yml
 
 # Vercel
 .vercel
@@ -31,9 +42,26 @@ next-env.d.ts
 .DS_Store
 Thumbs.db
 
+# IDE
+*.iml
+*.iws
+*.ipr
+
 # 日志
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
+
+# 临时与备份
+*.bak
+*.tmp
+*.swp
+*.swo
+*~
+*.orig
+
+# 数据目录（运行时挂载）
+/blog-data
+/static-files

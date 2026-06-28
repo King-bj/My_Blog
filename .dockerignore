@@ -1,0 +1,64 @@
+# 依赖目录
+node_modules
+.pnp
+.pnp.js
+
+# Next.js 构建产物
+.next
+out
+build
+
+# 环境变量
+.env
+.env*.local
+
+# Docker 自身产物
+docker-compose.yml
+docker-compose.*.yml
+
+# 数据目录（运行时挂载）
+blog-data
+
+# Git 相关
+.git
+.gitignore
+.gitattributes
+.github
+
+# IDE 与编辑器配置
+.vscode
+.idea
+*.iml
+
+# 系统文件
+.DS_Store
+Thumbs.db
+
+# 日志
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# 测试覆盖率
+coverage
+
+# TypeScript
+*.tsbuildinfo
+
+# 文档（构建不需要）
+README.md
+LICENSE
+docs
+upgrade.md
+AGENTS.md
+CLAUDE.md
+
+# 静态备份
+static-files
+
+# 历史遗留的 Java Spring Boot 资源（非 Next.js 产物，会触发 ESLint 报错）
+src/main
+src/test
+pom.xml
