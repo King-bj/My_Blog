@@ -3,6 +3,7 @@
 import { usePage } from '@/hooks/usePage';
 import { LoadingTransition, SkeletonCard, StaggerContainer } from '@/components/LoadingComponents';
 import { CodeBlock } from '@/components/CodeBlock';
+import Link from 'next/link';
 
 export default function AboutPage() {
   const { page: aboutMePage, loading, error } = usePage('about-me');
@@ -47,7 +48,10 @@ export default function AboutPage() {
   const actualContent = (
     <div className="content-wrapper py-12">
       <div className="max-w-3xl mx-auto">
-        <h1 className="text-3xl font-bold mb-8 fade-in-up">关于</h1>
+        <div className="flex flex-wrap items-center justify-between gap-4 mb-8">
+          <h1 className="text-3xl font-bold fade-in-up">关于</h1>
+          <Link href="/resume" className="btn btn-secondary">查看公开简历 →</Link>
+        </div>
 
         <StaggerContainer className="space-y-8">
           <div className="card p-8">

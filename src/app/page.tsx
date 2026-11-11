@@ -2,6 +2,7 @@
 
 import { TypewriterTitle } from '@/components/TypewriterTitle';
 import { useConfig } from '@/hooks/useConfig';
+import Link from 'next/link';
 import { LoadingTransition } from '@/components/LoadingComponents';
 
 export default function HomePage() {
@@ -61,6 +62,10 @@ export default function HomePage() {
           <p className="text-neutral-600 dark:text-neutral-400 leading-relaxed text-base">
             {config?.introduction || ''}
           </p>
+          <nav aria-label="求职与工程实践" className="mt-6 flex flex-wrap justify-center gap-5">
+            <Link href="/resume" className="underline">查看运维开发简历</Link>
+            <Link href="/posts/kylin-ebpf-tracing" className="underline">阅读麒麟 eBPF 适配记录</Link>
+          </nav>
         </div>
       </section>
     </div>

@@ -1,16 +1,16 @@
 {
-  "title": "Tiny Blog",
-  "description": "一个使用 Markdown 管理的极简极客风博客",
-  "introduction": "在这里记录技术、思考与沉淀。",
+  "title": "King 的工程笔记",
+  "description": "运维平台研发、生产 Kubernetes 与可观测性",
+  "introduction": "我记录现场遇到的问题、验证过的方案，以及方案在什么条件下会失效。",
   "author": {
-    "name": "Your Name",
-    "email": "your@email.com",
-    "github": "your-github-username"
+    "name": "King",
+    "email": "jlnwcy@gmail.com",
+    "github": "King-bj"
   },
-  "url": "https://your-blog.com",
+  "url": "https://docs.jinla.fun",
   "social": {
-    "github": "https://github.com/your-github-username",
-    "email": "your@email.com"
+    "github": "https://github.com/King-bj",
+    "email": "jlnwcy@gmail.com"
   },
   "theme": {
     "primaryColor": "#3b82f6"
@@ -19,7 +19,7 @@
     { "name": "Home", "href": "/" },
     { "name": "Posts", "href": "/posts" },
     { "name": "Tags", "href": "/tags" },
-    { "name": "About", "href": "/about" }
+    { "name": "关于我与作品", "href": "/about" }
   ],
   "postsPerPage": 6,
   "excerptLength": 200,
