@@ -64,7 +64,6 @@ export default function HomePage() {
           </p>
           <nav aria-label="求职与工程实践" className="mt-6 flex flex-wrap justify-center gap-5">
             <Link href="/resume" className="underline">查看运维开发简历</Link>
-            <Link href="/posts/kylin-ebpf-tracing" className="underline">阅读麒麟 eBPF 适配记录</Link>
           </nav>
         </div>
       </section>

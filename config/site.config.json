@@ -1,7 +1,7 @@
 {
   "title": "King 的工程笔记",
   "description": "运维平台研发、生产 Kubernetes 与可观测性",
-  "introduction": "我记录现场遇到的问题、验证过的方案，以及方案在什么条件下会失效。",
+  "introduction": "做过日志、监控和自动化运维平台，这里记一些排障过程，也放些自己做的小工具。",
   "author": {
     "name": "King",
     "email": "jlnwcy@gmail.com",
